@@ -22,6 +22,9 @@ pub fn execute(code_to_execute: String) {
     println!("{}", result);
 }
 
+// TODO the parser is super simple and hardcoded. It expects exactly 3 tokens which of course
+//  doesn't always have to be the case. Next we should allow for "infinite" additions by making
+//  the parser recursive.
 fn parse(tokens: Vec<&str>) -> Expr {
     if tokens.len() != 3 {
         panic!("Tokens need to be of length 3")
