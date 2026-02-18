@@ -13,13 +13,12 @@ enum Op {
     Add
 }
 
-pub fn execute(code_to_execute: String) {
+pub fn execute(code_to_execute: &str) -> i64 {
     let tokens: Vec<&str> = code_to_execute.split(" ").collect();
 
     let ast = parse(tokens);
 
-    let result = eval(&ast);
-    println!("{}", result);
+   eval(&ast)
 }
 
 // TODO the parser is super simple and hardcoded. It expects exactly 3 tokens which of course
@@ -57,5 +56,15 @@ fn eval(expr: &Expr) -> i64 {
                 Op::Add => left_evaluated + right_evaluated
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_addition() {
+        assert_eq!(execute("5 + 5"), 10)
     }
 }
