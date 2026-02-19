@@ -33,7 +33,7 @@ fn tokenize(code_to_execute: &str) -> Vec<Token> {
         .iter()
         .map(|word| match word.parse::<i64>() {
             Ok(n) => Token::Number(n),
-            Err(_) if *word == "+" => return Token::Operation(Operation::Add),
+            Err(_) if *word == "+" => Token::Operation(Operation::Add),
             Err(_) => panic!("Invalid syntax {}", word),
         })
         .collect()
