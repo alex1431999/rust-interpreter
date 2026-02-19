@@ -11,6 +11,7 @@ enum Expr {
 #[derive(Debug, Clone, Copy)]
 enum Operation {
     Add,
+    Subtract,
 }
 
 #[derive(Debug, Clone)]
@@ -34,6 +35,7 @@ fn tokenize(code_to_execute: &str) -> Vec<Token> {
         .map(|word| match word.parse::<i64>() {
             Ok(n) => Token::Number(n),
             Err(_) if *word == "+" => Token::Operation(Operation::Add),
+            Err(_) if *word == "-" => Token::Operation(Operation::Subtract),
             Err(_) => panic!("Invalid syntax {}", word),
         })
         .collect()
@@ -81,6 +83,7 @@ fn eval(expr: &Expr) -> i64 {
 
             match op {
                 Operation::Add => left_evaluated + right_evaluated,
+                Operation::Subtract => left_evaluated - right_evaluated,
             }
         }
     }
@@ -98,6 +101,11 @@ mod tests {
     #[test]
     fn three_numbers_addition() {
         assert_eq!(execute("5 + 5 + 5"), 15)
+    }
+
+    #[test]
+    fn basic_subtraction() {
+        assert_eq!(execute("5 - 5"), 0)
     }
 
     #[test]
