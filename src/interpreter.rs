@@ -12,6 +12,7 @@ enum Expr {
 enum Operation {
     Add,
     Subtract,
+    Multiply,
 }
 
 #[derive(Debug, Clone)]
@@ -36,6 +37,7 @@ fn tokenize(code_to_execute: &str) -> Vec<Token> {
             Ok(n) => Token::Number(n),
             Err(_) if *word == "+" => Token::Operation(Operation::Add),
             Err(_) if *word == "-" => Token::Operation(Operation::Subtract),
+            Err(_) if *word == "*" => Token::Operation(Operation::Multiply),
             Err(_) => panic!("Invalid syntax {}", word),
         })
         .collect()
@@ -92,6 +94,7 @@ fn eval(expr: &Expr) -> i64 {
             match op {
                 Operation::Add => left_evaluated + right_evaluated,
                 Operation::Subtract => left_evaluated - right_evaluated,
+                Operation::Multiply => left_evaluated * right_evaluated,
             }
         }
     }
@@ -120,6 +123,11 @@ mod tests {
     fn subtraction_advanced() {
         // This makes sure we aren't just resolving from righ to left but respecting math rules
         assert_eq!(execute("5 - 5 - 5"), -5)
+    }
+
+    #[test]
+    fn multiplication() {
+        assert_eq!(execute("5 * 5"), 25)
     }
 
     #[test]
