@@ -28,7 +28,7 @@ pub fn execute(code_to_execute: &str) -> i64 {
 }
 
 fn tokenize(code_to_execute: &str) -> Vec<Token> {
-    let words: Vec<&str> = code_to_execute.split(" ").collect();
+    let words: Vec<&str> = code_to_execute.split_whitespace().collect();
     words.iter().map(|word| {
         if *word == "+" {
             return Token::Operation(Operation::Add)
@@ -101,5 +101,10 @@ mod tests {
     #[test]
     fn three_numbers_addition() {
         assert_eq!(execute("5 + 5 + 5"), 15)
+    }
+
+    #[test]
+    fn deal_with_white_space() {
+        assert_eq!(execute("5     +   5"), 10)
     }
 }
