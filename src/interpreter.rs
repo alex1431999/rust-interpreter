@@ -132,6 +132,8 @@ mod tests {
 
     #[test]
     fn multiplication_advanced() {
+        // This test makes sure we are respecting math rules and aren't just evaluating from left
+        // to right. In this case the equation should be evaluate as 3 + (5 * 5)
         assert_eq!(execute("3 + 5 * 5"), 28)
     }
 
