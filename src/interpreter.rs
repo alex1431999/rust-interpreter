@@ -131,6 +131,11 @@ mod tests {
     }
 
     #[test]
+    fn multiplication_advanced() {
+        assert_eq!(execute("3 + 5 * 5"), 28)
+    }
+
+    #[test]
     fn deal_with_white_space() {
         assert_eq!(execute("5     +   5"), 10)
     }
