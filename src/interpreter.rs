@@ -42,7 +42,7 @@ fn tokenize(code_to_execute: &str) -> Vec<Token> {
 }
 
 fn parse(tokens: &[Token]) -> Expr {
-    if tokens.len() == 0 {
+    if tokens.is_empty() {
         panic!("You need at least one token to parse")
     }
 
