@@ -46,28 +46,36 @@ fn parse(tokens: &[Token]) -> Expr {
         panic!("You need at least one token to parse")
     }
 
-    if tokens.len() == 1 {
-        return match &tokens[0] {
-            Token::Number(n) => Expr::Number(*n),
-            _ => panic!("The last token can only be a number"),
+    let mut index = 0;
+
+    let mut left = match &tokens[index] {
+        Token::Number(n) => Expr::Number(*n),
+        _ => panic!("The first token must be a number"),
+    };
+
+    while index < tokens.len() - 1 {
+        index += 1;
+
+        let operation = match &tokens[index] {
+            Token::Operation(operation) => *operation,
+            _ => panic!("The second token must be an operation"),
         };
+
+        index += 1;
+
+        let right = match &tokens[index] {
+            Token::Number(n) => Expr::Number(*n),
+            _ => panic!("The third token must be a number"),
+        };
+
+        left = Expr::Binary {
+            left: Box::new(left),
+            operation,
+            right: Box::new(right),
+        }
     }
 
-    let current_token = &tokens[0];
-    let next_token = &tokens[1];
-    let remaining_tokens = &tokens[2..];
-
-    match current_token {
-        Token::Number(n) => match next_token {
-            Token::Operation(operation) => Expr::Binary {
-                left: Box::new(Expr::Number(*n)),
-                operation: *operation,
-                right: Box::new(parse(remaining_tokens)),
-            },
-            _ => panic!("a number can only be followed by an operation"),
-        },
-        _ => panic!("an expression cant start with an operation"),
-    }
+    left
 }
 
 fn eval(expr: &Expr) -> i64 {
