@@ -109,6 +109,12 @@ mod tests {
     }
 
     #[test]
+    fn subtraction_advanced() {
+        // This makes sure we aren't just resolving from righ to left but respecting math rules
+        assert_eq!(execute("5 - 5 - 5"), -5)
+    }
+
+    #[test]
     fn deal_with_white_space() {
         assert_eq!(execute("5     +   5"), 10)
     }
