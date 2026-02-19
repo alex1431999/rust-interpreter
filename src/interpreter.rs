@@ -30,15 +30,11 @@ pub fn execute(code_to_execute: &str) -> i64 {
 fn tokenize(code_to_execute: &str) -> Vec<Token> {
     let words: Vec<&str> = code_to_execute.split_whitespace().collect();
     words.iter().map(|word| {
-        if *word == "+" {
-            return Token::Operation(Operation::Add)
+        match word.parse::<i64>() {
+            Ok(n) => Token::Number(n),
+            Err(_) if *word == "+" => return Token::Operation(Operation::Add),
+            Err(_) => panic!("Invalid syntax {}", word),
         }
-
-        if word.parse::<i64>().is_ok() {
-            return Token::Number(word.parse().unwrap())
-        }
-
-        panic!("invalid syntax {}", word)
     }).collect()
 
 }
