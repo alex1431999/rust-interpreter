@@ -22,7 +22,7 @@ enum Token {
 pub fn execute(code_to_execute: &str) -> i64 {
     let tokens = tokenize(code_to_execute);
 
-    let ast = parse(tokens);
+    let ast = parse(&tokens);
 
     eval(&ast)
 }
@@ -39,7 +39,7 @@ fn tokenize(code_to_execute: &str) -> Vec<Token> {
         .collect()
 }
 
-fn parse(tokens: Vec<Token>) -> Expr {
+fn parse(tokens: &[Token]) -> Expr {
     if tokens.len() == 0 {
         panic!("You need at least one token to parse")
     }
@@ -53,7 +53,7 @@ fn parse(tokens: Vec<Token>) -> Expr {
 
     let current_token = &tokens[0];
     let next_token = &tokens[1];
-    let remaining_tokens = tokens[2..].to_vec();
+    let remaining_tokens = &tokens[2..];
 
     match current_token {
         Token::Number(n) => match next_token {
