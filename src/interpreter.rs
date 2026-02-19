@@ -8,7 +8,7 @@ enum Expr {
     },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 enum Operation {
     Add,
 }
@@ -59,7 +59,7 @@ fn parse(tokens: &[Token]) -> Expr {
         Token::Number(n) => match next_token {
             Token::Operation(operation) => Expr::Binary {
                 left: Box::new(Expr::Number(*n)),
-                operation: operation.clone(),
+                operation: *operation,
                 right: Box::new(parse(remaining_tokens)),
             },
             _ => panic!("a number can only be followed by an operation"),
