@@ -5,18 +5,18 @@ enum Expr {
         left: Box<Expr>,
         operation: Operation,
         right: Box<Expr>,
-    }
+    },
 }
 
 #[derive(Debug, Clone)]
 enum Operation {
-    Add
+    Add,
 }
 
 #[derive(Debug, Clone)]
 enum Token {
     Number(i64),
-    Operation(Operation)
+    Operation(Operation),
 }
 
 pub fn execute(code_to_execute: &str) -> i64 {
@@ -24,19 +24,19 @@ pub fn execute(code_to_execute: &str) -> i64 {
 
     let ast = parse(tokens);
 
-   eval(&ast)
+    eval(&ast)
 }
 
 fn tokenize(code_to_execute: &str) -> Vec<Token> {
     let words: Vec<&str> = code_to_execute.split_whitespace().collect();
-    words.iter().map(|word| {
-        match word.parse::<i64>() {
+    words
+        .iter()
+        .map(|word| match word.parse::<i64>() {
             Ok(n) => Token::Number(n),
             Err(_) if *word == "+" => return Token::Operation(Operation::Add),
             Err(_) => panic!("Invalid syntax {}", word),
-        }
-    }).collect()
-
+        })
+        .collect()
 }
 
 fn parse(tokens: Vec<Token>) -> Expr {
@@ -47,8 +47,8 @@ fn parse(tokens: Vec<Token>) -> Expr {
     if tokens.len() == 1 {
         return match &tokens[0] {
             Token::Number(n) => Expr::Number(*n),
-            _ => panic!("The last token can only be a number")
-        }
+            _ => panic!("The last token can only be a number"),
+        };
     }
 
     let current_token = &tokens[0];
@@ -56,30 +56,31 @@ fn parse(tokens: Vec<Token>) -> Expr {
     let remaining_tokens = tokens[2..].to_vec();
 
     match current_token {
-        Token::Number(n) => {
-            match next_token {
-                Token::Operation(operation) =>
-                    Expr::Binary {
-                        left: Box::new(Expr::Number(*n)),
-                        operation: operation.clone(),
-                        right: Box::new(parse(remaining_tokens)),
-                    },
-                _ => panic!("a number can only be followed by an operation")
-            }
-        }
-        _ => panic!("an expression cant start with an operation")
+        Token::Number(n) => match next_token {
+            Token::Operation(operation) => Expr::Binary {
+                left: Box::new(Expr::Number(*n)),
+                operation: operation.clone(),
+                right: Box::new(parse(remaining_tokens)),
+            },
+            _ => panic!("a number can only be followed by an operation"),
+        },
+        _ => panic!("an expression cant start with an operation"),
     }
 }
 
 fn eval(expr: &Expr) -> i64 {
     match expr {
         Expr::Number(n) => *n,
-        Expr::Binary { left, operation: op, right } => {
+        Expr::Binary {
+            left,
+            operation: op,
+            right,
+        } => {
             let left_evaluated = eval(left);
             let right_evaluated = eval(right);
 
             match op {
-                Operation::Add => left_evaluated + right_evaluated
+                Operation::Add => left_evaluated + right_evaluated,
             }
         }
     }
