@@ -43,44 +43,35 @@ fn tokenize(code_to_execute: &str) -> Vec<Token> {
 
 }
 
-// TODO the parser is super simple and hardcoded. It expects exactly 3 tokens which of course
-//  doesn't always have to be the case. Next we should allow for "infinite" additions by making
-//  the parser recursive.
 fn parse(tokens: Vec<Token>) -> Expr {
-    if tokens.len() != 3 {
-        panic!("We expect exactly 3 tokens")
+    if tokens.len() == 0 {
+        panic!("You need at least one token to parse")
     }
 
-    //if tokens.len() == 0 {
-    //    return expr
-    //}
+    if tokens.len() == 1 {
+        return match &tokens[0] {
+            Token::Number(n) => Expr::Number(*n),
+            _ => panic!("The last token can only be a number")
+        }
+    }
 
-    //let first_token = tokens[0];
-    
-    // Check if first token is a number
-    // Check if second token is an operation
-    // Check if third token is a number again
+    let current_token = &tokens[0];
+    let next_token = &tokens[1];
+    let remaining_tokens = tokens[2..].to_vec();
 
-    let left = match &tokens[0] {
-        Token::Number(n) => Expr::Number(*n),
-        _ => panic!("First token should be a number")
-    };
-
-    let operation = match &tokens[1] {
-        Token::Operation(operation) => operation.clone(),
-        _ => panic!("Second token should be an operation")
-    };
-
-    let right = match &tokens[2] {
-        Token::Number(n) => Expr::Number(*n),
-        _ => panic!("Third token should be a number")
-    };
-
-
-    Expr::Binary {
-        left: Box::new(left),
-        operation,
-        right: Box::new(right)
+    match current_token {
+        Token::Number(n) => {
+            match next_token {
+                Token::Operation(operation) =>
+                    Expr::Binary {
+                        left: Box::new(Expr::Number(*n)),
+                        operation: operation.clone(),
+                        right: Box::new(parse(remaining_tokens)),
+                    },
+                _ => panic!("a number can only be followed by an operation")
+            }
+        }
+        _ => panic!("an expression cant start with an operation")
     }
 }
 
