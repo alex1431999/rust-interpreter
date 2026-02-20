@@ -20,6 +20,7 @@ fn tokenize(code_to_execute: &str) -> Vec<Token> {
             Err(_) if *word == "+" => Token::Operation(Operation::Add),
             Err(_) if *word == "-" => Token::Operation(Operation::Subtract),
             Err(_) if *word == "*" => Token::Operation(Operation::Multiply),
+            Err(_) if *word == "/" => Token::Operation(Operation::Divide),
             Err(_) => panic!("Invalid syntax {}", word),
         })
         .collect()
@@ -40,6 +41,7 @@ fn eval(expr: &Expr) -> i64 {
                 Operation::Add => left_evaluated + right_evaluated,
                 Operation::Subtract => left_evaluated - right_evaluated,
                 Operation::Multiply => left_evaluated * right_evaluated,
+                Operation::Divide => left_evaluated / right_evaluated,
             }
         }
     }
@@ -80,6 +82,16 @@ mod tests {
         // This test makes sure we are respecting math rules and aren't just evaluating from left
         // to right. In this case the equation should be evaluate as 3 + (5 * 5)
         assert_eq!(execute("3 + 5 * 5"), 28)
+    }
+
+    #[test]
+    fn division() {
+        assert_eq!(execute("10 / 2"), 5)
+    }
+
+    #[test]
+    fn division_advanced() {
+        assert_eq!(execute("3 + 10 / 5"), 5)
     }
 
     #[test]

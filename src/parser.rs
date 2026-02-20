@@ -51,7 +51,7 @@ impl<'a> Parser<'a> {
         // Iterate over tokens while you still have operations left
         while let Some(Token::Operation(operation)) = self.tokens.get(self.pos) {
             match operation {
-                Operation::Multiply => {
+                Operation::Multiply | Operation::Divide => {
                     self.pos += 1;
 
                     // We instantly resolve right

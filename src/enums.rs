@@ -13,6 +13,7 @@ pub enum Operation {
     Add,
     Subtract,
     Multiply,
+    Divide,
 }
 
 #[derive(Debug, Clone)]
