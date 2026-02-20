@@ -79,6 +79,11 @@ mod tests {
     }
 
     #[test]
+    fn equation_advanced() {
+        assert_eq!(execute_interpreter("3 + 10 / 5 * 10 - 10 / 2"), 18)
+    }
+
+    #[test]
     fn deal_with_white_space() {
         assert_eq!(execute_interpreter("5     +   5"), 10)
     }
