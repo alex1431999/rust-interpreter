@@ -1,4 +1,6 @@
+mod enums;
 mod interpreter;
+mod parser;
 
 use std::fs;
 

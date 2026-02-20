@@ -1,25 +1,7 @@
-#[derive(Debug)]
-enum Expr {
-    Number(i64),
-    Binary {
-        left: Box<Expr>,
-        operation: Operation,
-        right: Box<Expr>,
-    },
-}
-
-#[derive(Debug, Clone, Copy)]
-enum Operation {
-    Add,
-    Subtract,
-    Multiply,
-}
-
-#[derive(Debug, Clone)]
-enum Token {
-    Number(i64),
-    Operation(Operation),
-}
+use crate::enums::Expr;
+use crate::enums::Operation;
+use crate::enums::Token;
+use crate::parser::parse;
 
 pub fn execute(code_to_execute: &str) -> i64 {
     let tokens = tokenize(code_to_execute);
@@ -41,43 +23,6 @@ fn tokenize(code_to_execute: &str) -> Vec<Token> {
             Err(_) => panic!("Invalid syntax {}", word),
         })
         .collect()
-}
-
-fn parse(tokens: &[Token]) -> Expr {
-    if tokens.is_empty() {
-        panic!("You need at least one token to parse")
-    }
-
-    let mut index = 0;
-
-    let mut left = match &tokens[index] {
-        Token::Number(n) => Expr::Number(*n),
-        _ => panic!("The first token must be a number"),
-    };
-
-    while index < tokens.len() - 1 {
-        index += 1;
-
-        let operation = match &tokens[index] {
-            Token::Operation(operation) => *operation,
-            _ => panic!("The second token must be an operation"),
-        };
-
-        index += 1;
-
-        let right = match &tokens[index] {
-            Token::Number(n) => Expr::Number(*n),
-            _ => panic!("The third token must be a number"),
-        };
-
-        left = Expr::Binary {
-            left: Box::new(left),
-            operation,
-            right: Box::new(right),
-        }
-    }
-
-    left
 }
 
 fn eval(expr: &Expr) -> i64 {
