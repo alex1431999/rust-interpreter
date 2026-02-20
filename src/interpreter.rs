@@ -1,32 +1,16 @@
 use crate::enums::Expr;
 use crate::enums::Operation;
-use crate::enums::Token;
-use crate::parser::parse;
+use crate::{parser, tokenizer};
 
-pub fn execute(code_to_execute: &str) -> i64 {
-    let tokens = tokenize(code_to_execute);
+pub fn execute_interpreter(input: &str) -> i64 {
+    let tokens = tokenizer::tokenize(input);
 
-    let ast = parse(&tokens);
+    let ast = parser::parse(&tokens);
 
-    eval(&ast)
+    interpret(&ast)
 }
 
-fn tokenize(code_to_execute: &str) -> Vec<Token> {
-    let words: Vec<&str> = code_to_execute.split_whitespace().collect();
-    words
-        .iter()
-        .map(|word| match word.parse::<i64>() {
-            Ok(n) => Token::Number(n),
-            Err(_) if *word == "+" => Token::Operation(Operation::Add),
-            Err(_) if *word == "-" => Token::Operation(Operation::Subtract),
-            Err(_) if *word == "*" => Token::Operation(Operation::Multiply),
-            Err(_) if *word == "/" => Token::Operation(Operation::Divide),
-            Err(_) => panic!("Invalid syntax {}", word),
-        })
-        .collect()
-}
-
-fn eval(expr: &Expr) -> i64 {
+fn interpret(expr: &Expr) -> i64 {
     match expr {
         Expr::Number(n) => *n,
         Expr::Binary {
@@ -34,8 +18,8 @@ fn eval(expr: &Expr) -> i64 {
             operation: op,
             right,
         } => {
-            let left_evaluated = eval(left);
-            let right_evaluated = eval(right);
+            let left_evaluated = interpret(left);
+            let right_evaluated = interpret(right);
 
             match op {
                 Operation::Add => left_evaluated + right_evaluated,
@@ -53,49 +37,49 @@ mod tests {
 
     #[test]
     fn basic_addition() {
-        assert_eq!(execute("5 + 5"), 10)
+        assert_eq!(execute_interpreter("5 + 5"), 10)
     }
 
     #[test]
     fn three_numbers_addition() {
-        assert_eq!(execute("5 + 5 + 5"), 15)
+        assert_eq!(execute_interpreter("5 + 5 + 5"), 15)
     }
 
     #[test]
     fn basic_subtraction() {
-        assert_eq!(execute("5 - 5"), 0)
+        assert_eq!(execute_interpreter("5 - 5"), 0)
     }
 
     #[test]
     fn subtraction_advanced() {
         // This makes sure we aren't just resolving from righ to left but respecting math rules
-        assert_eq!(execute("5 - 5 - 5"), -5)
+        assert_eq!(execute_interpreter("5 - 5 - 5"), -5)
     }
 
     #[test]
     fn multiplication() {
-        assert_eq!(execute("5 * 5"), 25)
+        assert_eq!(execute_interpreter("5 * 5"), 25)
     }
 
     #[test]
     fn multiplication_advanced() {
         // This test makes sure we are respecting math rules and aren't just evaluating from left
         // to right. In this case the equation should be evaluate as 3 + (5 * 5)
-        assert_eq!(execute("3 + 5 * 5"), 28)
+        assert_eq!(execute_interpreter("3 + 5 * 5"), 28)
     }
 
     #[test]
     fn division() {
-        assert_eq!(execute("10 / 2"), 5)
+        assert_eq!(execute_interpreter("10 / 2"), 5)
     }
 
     #[test]
     fn division_advanced() {
-        assert_eq!(execute("3 + 10 / 5"), 5)
+        assert_eq!(execute_interpreter("3 + 10 / 5"), 5)
     }
 
     #[test]
     fn deal_with_white_space() {
-        assert_eq!(execute("5     +   5"), 10)
+        assert_eq!(execute_interpreter("5     +   5"), 10)
     }
 }
