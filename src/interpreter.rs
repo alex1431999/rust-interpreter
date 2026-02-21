@@ -105,6 +105,6 @@ mod tests {
 
     #[test]
     fn nested_parentheses() {
-        assert_eq!(execute_interpreter("(2 + 3) * (4 + 5)"), 45)
+        assert_eq!(execute_interpreter("2 * (3 + (4 * 5))"), 46);
     }
 }
