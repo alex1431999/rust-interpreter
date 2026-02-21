@@ -107,4 +107,10 @@ mod tests {
     fn nested_parentheses() {
         assert_eq!(execute_interpreter("2 * (3 + (4 * 5))"), 46);
     }
+
+    #[test]
+    #[should_panic]
+    fn missing_closing_parentheses() {
+        execute_interpreter("2 + (2 + 5");
+    }
 }
