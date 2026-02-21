@@ -110,6 +110,12 @@ mod tests {
 
     #[test]
     #[should_panic]
+    fn missing_open_parentheses() {
+        execute_interpreter("2 + 2 + 5)");
+    }
+
+    #[test]
+    #[should_panic]
     fn missing_closing_parentheses() {
         execute_interpreter("2 + (2 + 5");
     }
