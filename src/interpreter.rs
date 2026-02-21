@@ -94,7 +94,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn deal_with_paratheses() {
         assert_eq!(execute_interpreter("2 * (5 + 5)"), 20)
     }
