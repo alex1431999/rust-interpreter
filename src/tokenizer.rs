@@ -1,4 +1,3 @@
-use crate::enums::Token::Number;
 use crate::enums::{Operation, Token};
 
 pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
@@ -15,7 +14,7 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
             number_being_parsed = number_being_parsed * 10 + character.to_digit(10).unwrap() as i64;
 
             if !has_next_character || !characters[i + 1].is_ascii_digit() {
-                tokens.push(Number(number_being_parsed));
+                tokens.push(Token::Number(number_being_parsed));
                 number_being_parsed = 0;
             }
 
@@ -58,6 +57,20 @@ mod tests {
                 Token::Number(55),
                 Token::Operation(Operation::Add),
                 Token::Number(55)
+            ]
+        )
+    }
+
+    #[test]
+    fn mixed_spacing_and_multi_digit() {
+        assert_eq!(
+            tokenize("  12+  34   *5 "),
+            vec![
+                Token::Number(12),
+                Token::Operation(Operation::Add),
+                Token::Number(34),
+                Token::Operation(Operation::Multiply),
+                Token::Number(5),
             ]
         )
     }
