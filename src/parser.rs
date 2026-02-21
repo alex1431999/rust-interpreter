@@ -38,12 +38,6 @@ impl<'a> Parser<'a> {
                         operation: *operation,
                         right: Box::new(right),
                     };
-
-                    // We skip closing parentheses
-                    match self.tokens[self.pos] {
-                        Token::ParenthesesClosed => self.pos += 1,
-                        _ => {}
-                    }
                 }
                 _ => break,
             }
@@ -87,7 +81,15 @@ impl<'a> Parser<'a> {
             }
             Some(Token::ParenthesesOpen) => {
                 self.pos += 1;
-                self.parse_expression()
+                let expression = self.parse_expression();
+
+                match self.tokens.get(self.pos) {
+                    Some(Token::ParenthesesClosed) => {
+                        self.pos += 1;
+                        expression
+                    }
+                    _ => panic!("A parentheses has opened, but not closed"),
+                }
             }
             _ => panic!("Invalid factor {:?}", token),
         }
