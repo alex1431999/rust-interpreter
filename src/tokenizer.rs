@@ -14,3 +14,19 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
         })
         .collect()
 }
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_case() {
+        assert_eq!(
+            tokenize("5 + 5"),
+            vec![
+                Token::Number(5),
+                Token::Operation(Operation::Add),
+                Token::Number(5)
+            ]
+        )
+    }
+}

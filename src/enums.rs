@@ -8,7 +8,7 @@ pub enum Expr {
     },
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Operation {
     Add,
     Subtract,
@@ -16,7 +16,7 @@ pub enum Operation {
     Divide,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     Number(i64),
     Operation(Operation),
