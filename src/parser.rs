@@ -88,7 +88,7 @@ impl<'a> Parser<'a> {
                         self.pos += 1;
                         expression
                     }
-                    _ => panic!("A parentheses has opened, but not closed"),
+                    _ => panic!("Expected ')', found {:?}", self.tokens.get(self.pos)),
                 }
             }
             _ => panic!("Invalid factor {:?}", token),
