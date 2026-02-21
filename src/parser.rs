@@ -8,15 +8,15 @@ struct Parser<'a> {
 
 pub fn parse(tokens: &[Token]) -> Expr {
     let mut parser = Parser { tokens, pos: 0 };
-    let expression = parser.parse_expression();
+    let ast = parser.parse_expression();
 
-    println!("Expression: {:?}", expression);
+    println!("AST: {:?}", ast);
 
     if parser.pos != tokens.len() {
         panic!("Has not parsed the entire expression")
     }
 
-    expression
+    ast
 }
 
 impl<'a> Parser<'a> {
