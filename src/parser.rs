@@ -83,12 +83,11 @@ impl<'a> Parser<'a> {
                 self.pos += 1;
                 let expression = self.parse_expression();
 
-                match self.tokens.get(self.pos) {
-                    Some(Token::ParenthesesClosed) => {
-                        self.pos += 1;
-                        expression
-                    }
-                    _ => panic!("Expected ')', found {:?}", self.tokens.get(self.pos)),
+                if let Some(Token::ParenthesesClosed) = self.tokens.get(self.pos) {
+                    self.pos += 1;
+                    expression
+                } else {
+                    panic!("Expected ')', found {:?}", self.tokens.get(self.pos));
                 }
             }
             _ => panic!("Invalid factor {:?}", token),
