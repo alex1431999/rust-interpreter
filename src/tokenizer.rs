@@ -11,10 +11,10 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
         let character = characters[i];
         let has_next_character = (i + 1) < characters.len();
 
-        if character.is_digit(10) {
+        if character.is_ascii_digit() {
             number_being_parsed = number_being_parsed * 10 + character.to_digit(10).unwrap() as i64;
 
-            if !has_next_character || !characters[i + 1].is_digit(10) {
+            if !has_next_character || !characters[i + 1].is_ascii_digit() {
                 tokens.push(Number(number_being_parsed));
                 number_being_parsed = 0;
             }
