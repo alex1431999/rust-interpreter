@@ -28,7 +28,7 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
             '*' => tokens.push(Token::Operation(Operation::Multiply)),
             '/' => tokens.push(Token::Operation(Operation::Divide)),
             ' ' => {} // We just ignore white space for now
-            _ => panic!("Unsupported character {}", character),
+            _ => panic!("Unexpected character {}, at position {}", character, i),
         }
     }
 
