@@ -10,6 +10,8 @@ pub fn parse(tokens: &[Token]) -> Expr {
     let mut parser = Parser { tokens, pos: 0 };
     let expression = parser.parse_expression();
 
+    println!("Expression: {:?}", expression);
+
     if parser.pos != tokens.len() {
         panic!("Has not parsed the entire expression")
     }
@@ -35,6 +37,12 @@ impl<'a> Parser<'a> {
                         left: Box::new(left),
                         operation: *operation,
                         right: Box::new(right),
+                    };
+
+                    // We skip closing parentheses
+                    match self.tokens[self.pos] {
+                        Token::ParenthesesClosed => self.pos += 1,
+                        _ => {}
                     }
                 }
                 _ => break,
@@ -76,6 +84,10 @@ impl<'a> Parser<'a> {
             Some(Token::Number(n)) => {
                 self.pos += 1;
                 Expr::Number(*n)
+            }
+            Some(Token::ParenthesesOpen) => {
+                self.pos += 1;
+                self.parse_expression()
             }
             _ => panic!("Invalid factor {:?}", token),
         }

@@ -94,7 +94,12 @@ mod tests {
     }
 
     #[test]
-    fn deal_with_paratheses() {
+    fn deal_with_parentheses() {
         assert_eq!(execute_interpreter("2 * (5 + 5)"), 20)
+    }
+
+    #[test]
+    fn deal_with_multiple_parentheses() {
+        assert_eq!(execute_interpreter("2 * (5 + 5) * (5 + 5)"), 200)
     }
 }
