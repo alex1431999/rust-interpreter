@@ -87,4 +87,10 @@ mod tests {
     fn deal_with_white_space() {
         assert_eq!(execute_interpreter("5     +   5"), 10)
     }
+
+    #[test]
+    #[ignore]
+    fn deal_with_paratheses() {
+        assert_eq!(execute_interpreter("2 * (5 + 5)"), 20)
+    }
 }
