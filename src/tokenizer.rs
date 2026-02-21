@@ -26,6 +26,8 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
             '-' => tokens.push(Token::Operation(Operation::Subtract)),
             '*' => tokens.push(Token::Operation(Operation::Multiply)),
             '/' => tokens.push(Token::Operation(Operation::Divide)),
+            '(' => tokens.push(Token::ParenthesesOpen),
+            ')' => tokens.push(Token::ParenthesesClosed),
             ' ' => {} // We just ignore white space for now
             _ => panic!("Unexpected character {}, at position {}", character, i),
         }
@@ -71,6 +73,22 @@ mod tests {
                 Token::Number(34),
                 Token::Operation(Operation::Multiply),
                 Token::Number(5),
+            ]
+        )
+    }
+
+    #[test]
+    fn parentheses() {
+        assert_eq!(
+            tokenize("12 * (5 + 5)"),
+            vec![
+                Token::Number(12),
+                Token::Operation(Operation::Multiply),
+                Token::ParenthesesOpen,
+                Token::Number(5),
+                Token::Operation(Operation::Add),
+                Token::Number(5),
+                Token::ParenthesesClosed,
             ]
         )
     }

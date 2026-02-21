@@ -20,4 +20,6 @@ pub enum Operation {
 pub enum Token {
     Number(i64),
     Operation(Operation),
+    ParenthesesOpen,
+    ParenthesesClosed,
 }
