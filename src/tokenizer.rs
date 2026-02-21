@@ -36,6 +36,7 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
     tokens
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
