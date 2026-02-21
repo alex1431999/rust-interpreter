@@ -84,22 +84,22 @@ mod tests {
     }
 
     #[test]
-    fn deal_with_white_space() {
+    fn white_space() {
         assert_eq!(execute_interpreter("5     +   5"), 10)
     }
 
     #[test]
-    fn deal_with_missing_white_space() {
+    fn missing_white_space() {
         assert_eq!(execute_interpreter("5+5"), 10)
     }
 
     #[test]
-    fn deal_with_parentheses() {
+    fn parentheses() {
         assert_eq!(execute_interpreter("2 * (5 + 5)"), 20)
     }
 
     #[test]
-    fn deal_with_multiple_parentheses() {
+    fn multiple_parentheses() {
         assert_eq!(execute_interpreter("2 * (5 + 5) * (5 + 5)"), 200)
     }
 
