@@ -1,12 +1,12 @@
 use crate::enums::Token;
-use crate::enums::{Expr, Operation};
+use crate::enums::{Expression, Operation};
 
 struct Parser<'a> {
     tokens: &'a [Token],
     pos: usize,
 }
 
-pub fn parse(tokens: &[Token]) -> Expr {
+pub fn parse(tokens: &[Token]) -> Expression {
     let mut parser = Parser { tokens, pos: 0 };
     let ast = parser.parse_expression();
 
@@ -20,7 +20,7 @@ pub fn parse(tokens: &[Token]) -> Expr {
 }
 
 impl<'a> Parser<'a> {
-    fn parse_expression(&mut self) -> Expr {
+    fn parse_expression(&mut self) -> Expression {
         // We instantly resolve left
         let mut left = self.parse_term();
 
@@ -33,7 +33,7 @@ impl<'a> Parser<'a> {
                     // We instantly resolve right
                     let right = self.parse_term();
 
-                    left = Expr::Binary {
+                    left = Expression::Binary {
                         left: Box::new(left),
                         operation: *operation,
                         right: Box::new(right),
@@ -46,7 +46,7 @@ impl<'a> Parser<'a> {
         left
     }
 
-    fn parse_term(&mut self) -> Expr {
+    fn parse_term(&mut self) -> Expression {
         // We instantly resolve left
         let mut left = self.parse_unary();
 
@@ -59,7 +59,7 @@ impl<'a> Parser<'a> {
                     // We instantly resolve right
                     let right = self.parse_unary();
 
-                    left = Expr::Binary {
+                    left = Expression::Binary {
                         left: Box::new(left),
                         operation: *operation,
                         right: Box::new(right),
@@ -72,34 +72,34 @@ impl<'a> Parser<'a> {
         left
     }
 
-    fn parse_unary(&mut self) -> Expr {
+    fn parse_unary(&mut self) -> Expression {
         let token = self.tokens.get(self.pos);
 
         match token {
             Some(Token::Operation(Operation::Add)) => {
                 self.pos += 1;
-                Expr::Unary {
+                Expression::Unary {
                     operation: Operation::Add,
-                    expr: Box::new(self.parse_unary()),
+                    expression: Box::new(self.parse_unary()),
                 }
             }
             Some(Token::Operation(Operation::Subtract)) => {
                 self.pos += 1;
-                Expr::Unary {
+                Expression::Unary {
                     operation: Operation::Subtract,
-                    expr: Box::new(self.parse_unary()),
+                    expression: Box::new(self.parse_unary()),
                 }
             }
             _ => self.parse_factor(),
         }
     }
 
-    fn parse_factor(&mut self) -> Expr {
+    fn parse_factor(&mut self) -> Expression {
         let token = self.tokens.get(self.pos);
         match token {
             Some(Token::Number(n)) => {
                 self.pos += 1;
-                Expr::Number(*n)
+                Expression::Number(*n)
             }
             Some(Token::ParenthesesOpen) => {
                 self.pos += 1;

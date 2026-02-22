@@ -1,14 +1,14 @@
 #[derive(Debug)]
-pub enum Expr {
+pub enum Expression {
     Number(i64),
     Binary {
-        left: Box<Expr>,
+        left: Box<Expression>,
         operation: Operation,
-        right: Box<Expr>,
+        right: Box<Expression>,
     },
     Unary {
         operation: Operation,
-        expr: Box<Expr>,
+        expression: Box<Expression>,
     },
 }
 

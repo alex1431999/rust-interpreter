@@ -1,4 +1,4 @@
-use crate::enums::Expr;
+use crate::enums::Expression;
 use crate::enums::Operation;
 use crate::{parser, tokenizer};
 
@@ -10,10 +10,10 @@ pub fn execute_interpreter(input: &str) -> i64 {
     interpret(&ast)
 }
 
-fn interpret(expr: &Expr) -> i64 {
-    match expr {
-        Expr::Number(n) => *n,
-        Expr::Binary {
+fn interpret(expression: &Expression) -> i64 {
+    match expression {
+        Expression::Number(n) => *n,
+        Expression::Binary {
             left,
             operation,
             right,
@@ -28,8 +28,11 @@ fn interpret(expr: &Expr) -> i64 {
                 Operation::Divide => left_evaluated / right_evaluated,
             }
         }
-        Expr::Unary { operation, expr } => {
-            let expression_evaluated = interpret(expr);
+        Expression::Unary {
+            operation,
+            expression,
+        } => {
+            let expression_evaluated = interpret(expression);
 
             match operation {
                 Operation::Add => expression_evaluated,
