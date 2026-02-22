@@ -26,4 +26,6 @@ pub enum Token {
     Operation(Operation),
     ParenthesesOpen,
     ParenthesesClosed,
+    Identifier(String),
+    Equals,
 }

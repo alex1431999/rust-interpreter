@@ -5,10 +5,22 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
     let characters: Vec<char> = code_to_execute.chars().collect();
 
     let mut number_being_parsed: i64 = 0;
+    let mut identifier_being_parsed = String::new();
 
     for i in 0..characters.len() {
         let character = characters[i];
         let has_next_character = (i + 1) < characters.len();
+
+        if is_identifier_character(character, identifier_being_parsed.is_empty()) {
+            identifier_being_parsed.push(character);
+
+            if !has_next_character || !is_identifier_character(characters[i + 1], false) {
+                tokens.push(Token::Identifier(identifier_being_parsed.clone()));
+                identifier_being_parsed = String::new();
+            }
+
+            continue;
+        }
 
         if character.is_ascii_digit() {
             number_being_parsed = number_being_parsed * 10 + character.to_digit(10).unwrap() as i64;
@@ -34,6 +46,14 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
     }
 
     tokens
+}
+
+fn is_identifier_character(character: char, is_first_character: bool) -> bool {
+    if is_first_character {
+        character.is_ascii_alphabetic() || character == '_'
+    } else {
+        character.is_ascii_alphanumeric() || character == '_'
+    }
 }
 
 #[cfg(test)]
@@ -91,6 +111,14 @@ mod tests {
                 Token::Number(5),
                 Token::ParenthesesClosed,
             ]
+        )
+    }
+
+    #[test]
+    fn identifier() {
+        assert_eq!(
+            tokenize("test_123"),
+            vec![Token::Identifier("test_123".parse().unwrap())]
         )
     }
 }
