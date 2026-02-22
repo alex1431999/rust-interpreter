@@ -48,7 +48,7 @@ impl<'a> Parser<'a> {
 
     fn parse_term(&mut self) -> Expr {
         // We instantly resolve left
-        let mut left = self.parse_factor();
+        let mut left = self.parse_unary();
 
         // Iterate over tokens while you still have operations left
         while let Some(Token::Operation(operation)) = self.tokens.get(self.pos) {
@@ -57,7 +57,7 @@ impl<'a> Parser<'a> {
                     self.pos += 1;
 
                     // We instantly resolve right
-                    let right = self.parse_factor();
+                    let right = self.parse_unary();
 
                     left = Expr::Binary {
                         left: Box::new(left),
@@ -70,6 +70,28 @@ impl<'a> Parser<'a> {
         }
 
         left
+    }
+
+    fn parse_unary(&mut self) -> Expr {
+        let token = self.tokens.get(self.pos);
+
+        match token {
+            Some(Token::Operation(Operation::Add)) => {
+                self.pos += 1;
+                Expr::Unary {
+                    operation: Operation::Add,
+                    expr: Box::new(self.parse_unary()),
+                }
+            }
+            Some(Token::Operation(Operation::Subtract)) => {
+                self.pos += 1;
+                Expr::Unary {
+                    operation: Operation::Subtract,
+                    expr: Box::new(self.parse_unary()),
+                }
+            }
+            _ => self.parse_factor(),
+        }
     }
 
     fn parse_factor(&mut self) -> Expr {

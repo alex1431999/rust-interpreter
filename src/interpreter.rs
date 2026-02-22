@@ -28,6 +28,15 @@ fn interpret(expr: &Expr) -> i64 {
                 Operation::Divide => left_evaluated / right_evaluated,
             }
         }
+        Expr::Unary { operation, expr } => {
+            let expression_evaluated = interpret(expr);
+
+            match operation {
+                Operation::Add => expression_evaluated,
+                Operation::Subtract => expression_evaluated * -1,
+                _ => panic!("You can only use add an subtract for unary operators"),
+            }
+        }
     }
 }
 
@@ -118,5 +127,14 @@ mod tests {
     #[should_panic]
     fn missing_closing_parentheses() {
         execute_interpreter("2 + (2 + 5");
+    }
+
+    #[test]
+    fn unary_expressions() {
+        assert_eq!(execute_interpreter("-5"), -5);
+        assert_eq!(execute_interpreter("--5"), 5);
+        assert_eq!(execute_interpreter("-(2 + 3)"), -5);
+        assert_eq!(execute_interpreter("-2 * 3"), -6);
+        assert_eq!(execute_interpreter("2 * -3"), -6);
     }
 }

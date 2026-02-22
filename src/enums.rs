@@ -6,6 +6,10 @@ pub enum Expr {
         operation: Operation,
         right: Box<Expr>,
     },
+    Unary {
+        operation: Operation,
+        expr: Box<Expr>,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
