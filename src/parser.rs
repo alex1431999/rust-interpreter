@@ -77,10 +77,15 @@ impl<'a> Parser<'a> {
             return self.parse_factor();
         };
 
-        self.pos += 1;
-        Expression::Unary {
-            operation: *operation,
-            expression: Box::new(self.parse_unary()),
+        match operation {
+            Operation::Add | Operation::Subtract => {
+                self.pos += 1;
+                Expression::Unary {
+                    operation: *operation,
+                    expression: Box::new(self.parse_unary()),
+                }
+            }
+            _ => panic!("Invalid token ${:?} at position {}", operation, self.pos),
         }
     }
 
@@ -104,5 +109,19 @@ impl<'a> Parser<'a> {
             }
             _ => panic!("Unexpected token {:?} at position {}", token, self.pos),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn invalid_unary_expression() {
+        parse(&vec![
+            Token::Operation(Operation::Multiply),
+            Token::Number(5),
+        ]);
     }
 }

@@ -140,4 +140,10 @@ mod tests {
         assert_eq!(execute_interpreter("-2 * 3"), -6);
         assert_eq!(execute_interpreter("2 * -3"), -6);
     }
+
+    #[test]
+    #[should_panic]
+    fn invalid_unary_expression() {
+        execute_interpreter("*5");
+    }
 }
