@@ -102,7 +102,7 @@ impl<'a> Parser<'a> {
                     panic!("Expected ')', found {:?}", self.tokens.get(self.pos));
                 }
             }
-            _ => panic!("Invalid factor {:?}", token),
+            _ => panic!("Unexpected token {:?} at position {}", token, self.pos),
         }
     }
 }
