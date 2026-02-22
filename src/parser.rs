@@ -73,24 +73,14 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_unary(&mut self) -> Expression {
-        let token = self.tokens.get(self.pos);
+        let Some(Token::Operation(operation)) = self.tokens.get(self.pos) else {
+            return self.parse_factor();
+        };
 
-        match token {
-            Some(Token::Operation(Operation::Add)) => {
-                self.pos += 1;
-                Expression::Unary {
-                    operation: Operation::Add,
-                    expression: Box::new(self.parse_unary()),
-                }
-            }
-            Some(Token::Operation(Operation::Subtract)) => {
-                self.pos += 1;
-                Expression::Unary {
-                    operation: Operation::Subtract,
-                    expression: Box::new(self.parse_unary()),
-                }
-            }
-            _ => self.parse_factor(),
+        self.pos += 1;
+        Expression::Unary {
+            operation: *operation,
+            expression: Box::new(self.parse_unary()),
         }
     }
 
