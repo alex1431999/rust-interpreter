@@ -40,6 +40,7 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
             '/' => tokens.push(Token::Operation(Operation::Divide)),
             '(' => tokens.push(Token::ParenthesesOpen),
             ')' => tokens.push(Token::ParenthesesClosed),
+            '=' => tokens.push(Token::Equals),
             ' ' => {} // We just ignore white space for now
             _ => panic!("Unexpected character {}, at position {}", character, i),
         }
@@ -117,8 +118,12 @@ mod tests {
     #[test]
     fn identifier() {
         assert_eq!(
-            tokenize("test_123"),
-            vec![Token::Identifier("test_123".parse().unwrap())]
+            tokenize("test_123 = 5"),
+            vec![
+                Token::Identifier("test_123".parse().unwrap()),
+                Token::Equals,
+                Token::Number(5)
+            ]
         )
     }
 }
