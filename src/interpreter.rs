@@ -15,13 +15,13 @@ fn interpret(expr: &Expr) -> i64 {
         Expr::Number(n) => *n,
         Expr::Binary {
             left,
-            operation: op,
+            operation,
             right,
         } => {
             let left_evaluated = interpret(left);
             let right_evaluated = interpret(right);
 
-            match op {
+            match operation {
                 Operation::Add => left_evaluated + right_evaluated,
                 Operation::Subtract => left_evaluated - right_evaluated,
                 Operation::Multiply => left_evaluated * right_evaluated,
