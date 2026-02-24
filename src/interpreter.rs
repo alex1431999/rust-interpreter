@@ -167,8 +167,14 @@ mod tests {
 
     #[test]
     fn assignment() {
-        assert_eq!(execute_interpreter("x = 5"), 5)
+        assert_eq!(execute_interpreter("x = 5"), 5);
+        assert_eq!(execute_interpreter("x = 5 + 5"), 10);
+        assert_eq!(execute_interpreter("x = 5 + 5 + 5"), 15);
     }
 
-    // TODO test if you can read variables as well
+    #[test]
+    #[should_panic]
+    fn undefined_variable() {
+        execute_interpreter("x + 5");
+    }
 }
