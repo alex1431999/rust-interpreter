@@ -164,4 +164,11 @@ mod tests {
     fn invalid_unary_expression() {
         execute_interpreter("*5");
     }
+
+    #[test]
+    fn assignment() {
+        assert_eq!(execute_interpreter("x = 5"), 5)
+    }
+
+    // TODO test if you can read variables as well
 }
