@@ -1,35 +1,35 @@
 use crate::enums::{Operation, Token};
 
 pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
-    let mut tokens: Vec<Token> = vec![];
+    let mut tokens = vec![];
     let characters: Vec<char> = code_to_execute.chars().collect();
+    let mut i = 0;
 
-    let mut number_being_parsed: i64 = 0;
-    let mut identifier_being_parsed = String::new();
-
-    for i in 0..characters.len() {
+    while i < characters.len() {
         let character = characters[i];
-        let has_next_character = (i + 1) < characters.len();
 
-        if is_identifier_character(character, identifier_being_parsed.is_empty()) {
-            identifier_being_parsed.push(character);
-
-            if !has_next_character || !is_identifier_character(characters[i + 1], false) {
-                tokens.push(Token::Identifier(identifier_being_parsed.clone()));
-                identifier_being_parsed = String::new();
-            }
-
+        if character.is_whitespace() {
+            i += 1;
             continue;
         }
 
         if character.is_ascii_digit() {
-            number_being_parsed = number_being_parsed * 10 + character.to_digit(10).unwrap() as i64;
-
-            if !has_next_character || !characters[i + 1].is_ascii_digit() {
-                tokens.push(Token::Number(number_being_parsed));
-                number_being_parsed = 0;
+            let mut number = 0;
+            while i < characters.len() && characters[i].is_ascii_digit() {
+                number = number * 10 + characters[i].to_digit(10).unwrap() as i64;
+                i += 1;
             }
+            tokens.push(Token::Number(number));
+            continue;
+        }
 
+        if is_identifier_character(character, true) {
+            let mut ident = String::new();
+            while i < characters.len() && is_identifier_character(characters[i], ident.is_empty()) {
+                ident.push(characters[i]);
+                i += 1;
+            }
+            tokens.push(Token::Identifier(ident));
             continue;
         }
 
@@ -41,9 +41,10 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
             '(' => tokens.push(Token::ParenthesesOpen),
             ')' => tokens.push(Token::ParenthesesClosed),
             '=' => tokens.push(Token::Equals),
-            ' ' => {} // We just ignore white space for now
-            _ => panic!("Unexpected character {}, at position {}", character, i),
+            _ => panic!("Unexpected character '{}' at {}", character, i),
         }
+
+        i += 1;
     }
 
     tokens
