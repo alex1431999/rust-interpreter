@@ -21,7 +21,28 @@ pub fn parse(tokens: &[Token]) -> Expression {
 
 impl<'a> Parser<'a> {
     fn parse(&mut self) -> Expression {
-        self.parse_expression()
+        self.parse_assignment()
+    }
+
+    /*
+    An assignment follows this pattern:
+        identifier -> Equals -> expression
+     */
+    fn parse_assignment(&mut self) -> Expression {
+        let expression = self.parse_expression();
+
+        if let Expression::Variable(ref name) = expression {
+            if let Some(Token::Equals) = self.tokens.get(self.pos) {
+                self.pos += 1;
+                let value = self.parse_assignment();
+                return Expression::Assign {
+                    name: name.clone(),
+                    value: Box::new(value),
+                };
+            }
+        }
+
+        expression
     }
 
     fn parse_expression(&mut self) -> Expression {
@@ -111,6 +132,10 @@ impl<'a> Parser<'a> {
                     panic!("Expected ')', found {:?}", self.tokens.get(self.pos));
                 }
             }
+            Some(Token::Identifier(name)) => {
+                self.pos += 1;
+                Expression::Variable(name.clone())
+            }
             _ => panic!("Unexpected token {:?} at position {}", token, self.pos),
         }
     }
@@ -127,5 +152,20 @@ mod tests {
             Token::Operation(Operation::Multiply),
             Token::Number(5),
         ]);
+    }
+
+    #[test]
+    fn assignment() {
+        assert_eq!(
+            parse(&vec![
+                Token::Identifier("test".to_string()),
+                Token::Equals,
+                Token::Number(15)
+            ]),
+            Expression::Assign {
+                name: "test".to_string(),
+                value: Box::new(Expression::Number(15))
+            }
+        )
     }
 }

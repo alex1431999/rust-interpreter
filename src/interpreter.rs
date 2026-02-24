@@ -40,6 +40,18 @@ fn interpret(expression: &Expression) -> i64 {
                 _ => panic!("You can only use add an subtract for unary operators"),
             }
         }
+        Expression::Assign { name, value } => {
+            let value_evaluated = interpret(value);
+            // TODO
+
+            65 // TODO remove
+        }
+
+        Expression::Variable(name) => {
+            // TODO
+
+            65 // TODO remove
+        }
     }
 }
 
