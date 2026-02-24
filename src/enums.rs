@@ -1,8 +1,11 @@
-// TODO we can pick up from step 3 here -> Extend your AST
-
 #[derive(Debug)]
 pub enum Expression {
     Number(i64),
+    Variable(String),
+    Assign {
+        name: String,
+        value: Box<Expression>,
+    },
     Binary {
         left: Box<Expression>,
         operation: Operation,
