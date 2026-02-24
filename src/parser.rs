@@ -8,7 +8,7 @@ struct Parser<'a> {
 
 pub fn parse(tokens: &[Token]) -> Expression {
     let mut parser = Parser { tokens, pos: 0 };
-    let ast = parser.parse_expression();
+    let ast = parser.parse();
 
     println!("AST: {:?}", ast);
 
@@ -20,6 +20,10 @@ pub fn parse(tokens: &[Token]) -> Expression {
 }
 
 impl<'a> Parser<'a> {
+    fn parse(&mut self) -> Expression {
+        self.parse_expression()
+    }
+
     fn parse_expression(&mut self) -> Expression {
         // We instantly resolve left
         let mut left = self.parse_term();
