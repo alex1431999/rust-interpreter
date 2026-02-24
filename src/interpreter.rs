@@ -1,16 +1,24 @@
 use crate::enums::Expression;
 use crate::enums::Operation;
 use crate::{parser, tokenizer};
+use std::collections::HashMap;
+
+struct Environment {
+    values: HashMap<String, i64>,
+}
 
 pub fn execute_interpreter(input: &str) -> i64 {
     let tokens = tokenizer::tokenize(input);
 
     let ast = parser::parse(&tokens);
 
-    interpret(&ast)
+    let mut env = Environment {
+        values: HashMap::new(),
+    };
+    interpret(&ast, &mut env)
 }
 
-fn interpret(expression: &Expression) -> i64 {
+fn interpret(expression: &Expression, env: &mut Environment) -> i64 {
     match expression {
         Expression::Number(n) => *n,
         Expression::Binary {
@@ -18,8 +26,8 @@ fn interpret(expression: &Expression) -> i64 {
             operation,
             right,
         } => {
-            let left_evaluated = interpret(left);
-            let right_evaluated = interpret(right);
+            let left_evaluated = interpret(left, env);
+            let right_evaluated = interpret(right, env);
 
             match operation {
                 Operation::Add => left_evaluated + right_evaluated,
@@ -32,7 +40,7 @@ fn interpret(expression: &Expression) -> i64 {
             operation,
             expression,
         } => {
-            let expression_evaluated = interpret(expression);
+            let expression_evaluated = interpret(expression, env);
 
             match operation {
                 Operation::Add => expression_evaluated,
@@ -41,17 +49,15 @@ fn interpret(expression: &Expression) -> i64 {
             }
         }
         Expression::Assign { name, value } => {
-            let value_evaluated = interpret(value);
-            // TODO
-
-            65 // TODO remove
+            let value_evaluated = interpret(value, env);
+            env.values.insert(name.clone(), value_evaluated);
+            value_evaluated
         }
 
-        Expression::Variable(name) => {
-            // TODO
-
-            65 // TODO remove
-        }
+        Expression::Variable(name) => *env
+            .values
+            .get(name)
+            .unwrap_or_else(|| panic!("Undefined variable '{}'", name)),
     }
 }
 
