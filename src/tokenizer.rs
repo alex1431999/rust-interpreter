@@ -19,7 +19,7 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
 
 impl<'a> Tokenizer<'a> {
     fn tokenize(mut self) -> Vec<Token> {
-        while self.has_characters_left() {
+        while self.is_at_end() {
             if self.process_white_space() {
                 continue;
             }
@@ -62,7 +62,7 @@ impl<'a> Tokenizer<'a> {
 
         if character.is_ascii_digit() {
             let mut number = 0;
-            while self.has_characters_left() && self.get_current_character().is_ascii_digit() {
+            while self.is_at_end() && self.get_current_character().is_ascii_digit() {
                 number = number * 10 + self.get_current_character().to_digit(10).unwrap() as i64;
                 self.advance()
             }
@@ -78,7 +78,7 @@ impl<'a> Tokenizer<'a> {
 
         if is_identifier_character(character, true) {
             let mut identifier = String::new();
-            while self.has_characters_left()
+            while self.is_at_end()
                 && is_identifier_character(self.get_current_character(), identifier.is_empty())
             {
                 identifier.push(self.get_current_character());
@@ -114,7 +114,7 @@ impl<'a> Tokenizer<'a> {
         self.characters[self.pos]
     }
 
-    fn has_characters_left(&self) -> bool {
+    fn is_at_end(&self) -> bool {
         self.pos < self.characters.len()
     }
 
