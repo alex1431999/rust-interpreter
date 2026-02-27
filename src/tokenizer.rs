@@ -61,13 +61,12 @@ impl<'a> Tokenizer<'a> {
         let character = self.get_current_character();
 
         if character.is_ascii_digit() {
-            let mut number = self.get_current_character().to_digit(10).unwrap() as i64;
-            while self.has_next_character() && self.get_next_character().is_ascii_digit() {
-                number = number * 10 + self.get_next_character().to_digit(10).unwrap() as i64;
+            let mut number = 0;
+            while self.has_characters_left() && self.get_current_character().is_ascii_digit() {
+                number = number * 10 + self.get_current_character().to_digit(10).unwrap() as i64;
                 self.advance()
             }
             self.tokens.push(Token::Number(number));
-            self.advance();
             return true;
         }
 
@@ -115,16 +114,8 @@ impl<'a> Tokenizer<'a> {
         self.characters[self.pos]
     }
 
-    fn get_next_character(&self) -> char {
-        self.characters[self.pos + 1]
-    }
-
     fn has_characters_left(&self) -> bool {
         self.pos < self.characters.len()
-    }
-
-    fn has_next_character(&self) -> bool {
-        self.pos < self.characters.len() - 1
     }
 
     fn advance(&mut self) {
