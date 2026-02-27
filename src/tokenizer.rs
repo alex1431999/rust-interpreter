@@ -1,53 +1,135 @@
 use crate::enums::{Operation, Token};
 
+struct Tokenizer<'a> {
+    characters: &'a Vec<char>,
+    tokens: Vec<Token>,
+    pos: usize,
+}
+
 pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
-    let mut tokens = vec![];
     let characters: Vec<char> = code_to_execute.chars().collect();
-    let mut i = 0;
+    let mut tokenizer = Tokenizer {
+        characters: &characters,
+        tokens: vec![],
+        pos: 0,
+    };
 
-    while i < characters.len() {
-        let character = characters[i];
+    tokenizer.tokenize()
+}
 
-        if character.is_whitespace() {
-            i += 1;
-            continue;
-        }
-
-        if character.is_ascii_digit() {
-            let mut number = 0;
-            while i < characters.len() && characters[i].is_ascii_digit() {
-                number = number * 10 + characters[i].to_digit(10).unwrap() as i64;
-                i += 1;
+impl<'a> Tokenizer<'a> {
+    fn tokenize(&mut self) -> Vec<Token> {
+        while self.has_characters_left() {
+            if self.process_white_space() {
+                continue;
             }
-            tokens.push(Token::Number(number));
-            continue;
-        }
 
-        if is_identifier_character(character, true) {
-            let mut ident = String::new();
-            while i < characters.len() && is_identifier_character(characters[i], ident.is_empty()) {
-                ident.push(characters[i]);
-                i += 1;
+            if self.process_number() {
+                continue;
             }
-            tokens.push(Token::Identifier(ident));
-            continue;
+
+            if self.process_identifier() {
+                continue;
+            }
+
+            if self.process_basic_tokens() {
+                continue;
+            }
+
+            panic!(
+                "Unexpected character '{}' at {}",
+                self.get_current_character(),
+                self.pos
+            )
         }
 
-        match character {
-            '+' => tokens.push(Token::Operation(Operation::Add)),
-            '-' => tokens.push(Token::Operation(Operation::Subtract)),
-            '*' => tokens.push(Token::Operation(Operation::Multiply)),
-            '/' => tokens.push(Token::Operation(Operation::Divide)),
-            '(' => tokens.push(Token::ParenthesesOpen),
-            ')' => tokens.push(Token::ParenthesesClosed),
-            '=' => tokens.push(Token::Equals),
-            _ => panic!("Unexpected character '{}' at {}", character, i),
-        }
-
-        i += 1;
+        self.tokens.clone()
     }
 
-    tokens
+    fn process_white_space(&mut self) -> bool {
+        let character = self.get_current_character();
+
+        if character.is_whitespace() {
+            self.advance();
+            return true;
+        }
+
+        false
+    }
+
+    fn process_number(&mut self) -> bool {
+        let character = self.get_current_character();
+
+        if character.is_ascii_digit() {
+            let mut number = self.get_current_character().to_digit(10).unwrap() as i64;
+            while self.has_next_character() && self.get_next_character().is_ascii_digit() {
+                number = number * 10 + self.get_next_character().to_digit(10).unwrap() as i64;
+                self.advance()
+            }
+            self.tokens.push(Token::Number(number));
+            self.advance();
+            return true;
+        }
+
+        false
+    }
+
+    fn process_identifier(&mut self) -> bool {
+        let character = self.get_current_character();
+
+        if is_identifier_character(character, true) {
+            let mut identifier = String::new();
+            while self.has_characters_left()
+                && is_identifier_character(self.get_current_character(), identifier.is_empty())
+            {
+                identifier.push(self.get_current_character());
+                self.advance()
+            }
+            self.tokens.push(Token::Identifier(identifier));
+            return true;
+        }
+
+        false
+    }
+
+    fn process_basic_tokens(&mut self) -> bool {
+        let character = self.get_current_character();
+
+        match character {
+            '+' => self.tokens.push(Token::Operation(Operation::Add)),
+            '-' => self.tokens.push(Token::Operation(Operation::Subtract)),
+            '*' => self.tokens.push(Token::Operation(Operation::Multiply)),
+            '/' => self.tokens.push(Token::Operation(Operation::Divide)),
+            '(' => self.tokens.push(Token::ParenthesesOpen),
+            ')' => self.tokens.push(Token::ParenthesesClosed),
+            '=' => self.tokens.push(Token::Equals),
+            _ => return false,
+        }
+
+        self.advance();
+
+        true
+    }
+
+    fn get_current_character(&mut self) -> char {
+        self.characters[self.pos]
+    }
+
+    fn get_next_character(&mut self) -> char {
+        self.characters[self.pos + 1]
+    }
+
+    fn has_characters_left(&mut self) -> bool {
+        self.pos < self.characters.len()
+    }
+
+    fn has_next_character(&mut self) -> bool {
+        self.pos < self.characters.len() - 1
+    }
+
+    fn advance(&mut self) {
+        self.pos += 1
+    }
 }
 
 fn is_identifier_character(character: char, is_first_character: bool) -> bool {
