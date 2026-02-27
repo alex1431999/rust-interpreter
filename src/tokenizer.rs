@@ -8,7 +8,7 @@ struct Tokenizer<'a> {
 
 pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
     let characters: Vec<char> = code_to_execute.chars().collect();
-    let mut tokenizer = Tokenizer {
+    let tokenizer = Tokenizer {
         characters: &characters,
         tokens: vec![],
         pos: 0,
@@ -18,7 +18,7 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
 }
 
 impl<'a> Tokenizer<'a> {
-    fn tokenize(&mut self) -> Vec<Token> {
+    fn tokenize(mut self) -> Vec<Token> {
         while self.has_characters_left() {
             if self.process_white_space() {
                 continue;
@@ -43,7 +43,7 @@ impl<'a> Tokenizer<'a> {
             )
         }
 
-        self.tokens.clone()
+        self.tokens
     }
 
     fn process_white_space(&mut self) -> bool {
