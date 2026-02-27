@@ -1,7 +1,7 @@
 use crate::enums::{Operation, Token};
 
 struct Tokenizer<'a> {
-    characters: &'a Vec<char>,
+    characters: &'a [char],
     tokens: Vec<Token>,
     pos: usize,
 }
