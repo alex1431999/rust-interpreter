@@ -111,19 +111,19 @@ impl<'a> Tokenizer<'a> {
         true
     }
 
-    fn get_current_character(&mut self) -> char {
+    fn get_current_character(&self) -> char {
         self.characters[self.pos]
     }
 
-    fn get_next_character(&mut self) -> char {
+    fn get_next_character(&self) -> char {
         self.characters[self.pos + 1]
     }
 
-    fn has_characters_left(&mut self) -> bool {
+    fn has_characters_left(&self) -> bool {
         self.pos < self.characters.len()
     }
 
-    fn has_next_character(&mut self) -> bool {
+    fn has_next_character(&self) -> bool {
         self.pos < self.characters.len() - 1
     }
 
