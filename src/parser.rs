@@ -80,7 +80,7 @@ impl<'a> Parser<'a> {
         self.pos += 1;
 
         if self.tokens.get(self.pos) != Some(&Token::ParenthesesOpen) {
-            panic!("Expected open parentheses after yell call")
+            panic!("Expected '(' after yell call")
         }
 
         let expression = self.parse_expression();

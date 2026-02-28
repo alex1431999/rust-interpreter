@@ -204,6 +204,7 @@ mod tests {
 
     #[test]
     fn yell() {
-        assert_eq!(execute_interpreter("yell(5 + 5)"), 0)
+        assert_eq!(execute_interpreter("yell(5 + 5)"), 0);
+        assert_eq!(execute_interpreter("yell(5 + 5); 10 + 10"), 20)
     }
 }
