@@ -21,7 +21,38 @@ pub fn parse(tokens: &[Token]) -> Expression {
 
 impl<'a> Parser<'a> {
     fn parse(&mut self) -> Expression {
-        self.parse_assignment()
+        self.parse_statement()
+    }
+
+    fn parse_statement(&mut self) -> Expression {
+        match self.tokens.get(self.pos) {
+            Some(Token::Remember) => self.parse_declaration(),
+            _ => self.parse_assignment(),
+        }
+    }
+
+    fn parse_declaration(&mut self) -> Expression {
+        self.pos += 1; // Consume remember
+
+        let name = match self.tokens.get(self.pos) {
+            Some(Token::Identifier(name)) => {
+                self.pos += 1;
+                name.clone()
+            }
+            _ => panic!("Expected identifier after remember"),
+        };
+
+        if self.tokens.get(self.pos) != Some(&Token::Equals) {
+            panic!("Expected '=' after identifier")
+        }
+        self.pos += 1;
+
+        let value = self.parse_expression();
+
+        Expression::Assign {
+            name,
+            value: Box::new(value),
+        }
     }
 
     /*
@@ -158,6 +189,7 @@ mod tests {
     fn assignment() {
         assert_eq!(
             parse(&vec![
+                Token::Remember,
                 Token::Identifier("test".to_string()),
                 Token::Equals,
                 Token::Number(15)

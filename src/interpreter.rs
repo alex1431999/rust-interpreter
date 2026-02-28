@@ -167,9 +167,9 @@ mod tests {
 
     #[test]
     fn assignment() {
-        assert_eq!(execute_interpreter("x = 5"), 5);
-        assert_eq!(execute_interpreter("x = 5 + 5"), 10);
-        assert_eq!(execute_interpreter("x = 5 + 5 + 5"), 15);
+        assert_eq!(execute_interpreter("remember x = 5"), 5);
+        assert_eq!(execute_interpreter("remember x = 5 + 5"), 10);
+        assert_eq!(execute_interpreter("remember x = 5 + 5 + 5"), 15);
     }
 
     #[test]

@@ -33,4 +33,5 @@ pub enum Token {
     ParenthesesClosed,
     Identifier(String),
     Equals,
+    Remember,
 }

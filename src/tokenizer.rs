@@ -50,7 +50,7 @@ impl<'a> Tokenizer<'a> {
         let character = self.get_current_character();
 
         if character.is_whitespace() {
-            self.advance();
+            self.advance(1);
             return true;
         }
 
@@ -64,7 +64,7 @@ impl<'a> Tokenizer<'a> {
             let mut number = 0;
             while self.has_more() && self.get_current_character().is_ascii_digit() {
                 number = number * 10 + self.get_current_character().to_digit(10).unwrap() as i64;
-                self.advance()
+                self.advance(1)
             }
             self.tokens.push(Token::Number(number));
             return true;
@@ -75,16 +75,21 @@ impl<'a> Tokenizer<'a> {
 
     fn process_identifier(&mut self) -> bool {
         let character = self.get_current_character();
-
         if is_identifier_character(character, true) {
             let mut identifier = String::new();
             while self.has_more()
                 && is_identifier_character(self.get_current_character(), identifier.is_empty())
             {
                 identifier.push(self.get_current_character());
-                self.advance()
+                self.advance(1)
             }
-            self.tokens.push(Token::Identifier(identifier));
+
+            let token = match identifier.as_str() {
+                "remember" => Token::Remember,
+                _ => Token::Identifier(identifier),
+            };
+            self.tokens.push(token);
+
             return true;
         }
 
@@ -105,7 +110,7 @@ impl<'a> Tokenizer<'a> {
             _ => return false,
         }
 
-        self.advance();
+        self.advance(1);
 
         true
     }
@@ -118,8 +123,8 @@ impl<'a> Tokenizer<'a> {
         self.pos < self.characters.len()
     }
 
-    fn advance(&mut self) {
-        self.pos += 1
+    fn advance(&mut self, amount: usize) {
+        self.pos += amount
     }
 }
 
@@ -192,8 +197,9 @@ mod tests {
     #[test]
     fn identifier() {
         assert_eq!(
-            tokenize("test_123 = 5"),
+            tokenize("remember test_123 = 5"),
             vec![
+                Token::Remember,
                 Token::Identifier("test_123".parse().unwrap()),
                 Token::Equals,
                 Token::Number(5)
