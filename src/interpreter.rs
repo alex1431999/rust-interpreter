@@ -1,5 +1,6 @@
 use crate::enums::Expression;
 use crate::enums::Operation;
+use crate::parser::Program;
 use crate::{parser, tokenizer};
 use std::collections::HashMap;
 
@@ -18,7 +19,17 @@ pub fn execute_interpreter(input: &str) -> i64 {
     interpret(&ast, &mut env)
 }
 
-fn interpret(expression: &Expression, env: &mut Environment) -> i64 {
+fn interpret(program: &Program, env: &mut Environment) -> i64 {
+    let mut result: i64 = 0;
+
+    for expression in &program.expressions {
+        result = interpret_expression(&expression, env)
+    }
+
+    result
+}
+
+fn interpret_expression(expression: &Expression, env: &mut Environment) -> i64 {
     match expression {
         Expression::Number(n) => *n,
         Expression::Binary {
@@ -26,8 +37,8 @@ fn interpret(expression: &Expression, env: &mut Environment) -> i64 {
             operation,
             right,
         } => {
-            let left_evaluated = interpret(left, env);
-            let right_evaluated = interpret(right, env);
+            let left_evaluated = interpret_expression(left, env);
+            let right_evaluated = interpret_expression(right, env);
 
             match operation {
                 Operation::Add => left_evaluated + right_evaluated,
@@ -40,7 +51,7 @@ fn interpret(expression: &Expression, env: &mut Environment) -> i64 {
             operation,
             expression,
         } => {
-            let expression_evaluated = interpret(expression, env);
+            let expression_evaluated = interpret_expression(expression, env);
 
             match operation {
                 Operation::Add => expression_evaluated,
@@ -49,7 +60,7 @@ fn interpret(expression: &Expression, env: &mut Environment) -> i64 {
             }
         }
         Expression::Assign { name, value } => {
-            let value_evaluated = interpret(value, env);
+            let value_evaluated = interpret_expression(value, env);
             env.values.insert(name.clone(), value_evaluated);
             value_evaluated
         }
@@ -176,5 +187,10 @@ mod tests {
     #[should_panic]
     fn undefined_variable() {
         execute_interpreter("x + 5");
+    }
+
+    #[test]
+    fn multiple_statements() {
+        assert_eq!(execute_interpreter("remember x = 5; x + 5"), 10)
     }
 }

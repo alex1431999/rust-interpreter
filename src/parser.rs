@@ -1,14 +1,19 @@
 use crate::enums::Token;
 use crate::enums::{Expression, Operation};
 
+#[derive(Debug, PartialEq)]
+pub struct Program {
+    pub expressions: Vec<Expression>,
+}
+
 struct Parser<'a> {
     tokens: &'a [Token],
     pos: usize,
 }
 
-pub fn parse(tokens: &[Token]) -> Expression {
+pub fn parse(tokens: &[Token]) -> Program {
     let mut parser = Parser { tokens, pos: 0 };
-    let ast = parser.parse();
+    let ast = parser.parse_program();
 
     println!("AST: {:?}", ast);
 
@@ -20,8 +25,23 @@ pub fn parse(tokens: &[Token]) -> Expression {
 }
 
 impl<'a> Parser<'a> {
-    fn parse(&mut self) -> Expression {
-        self.parse_statement()
+    fn parse_program(&mut self) -> Program {
+        let mut program = Program {
+            expressions: vec![],
+        };
+
+        while self.pos < self.tokens.len() {
+            let statement = self.parse_statement();
+            program.expressions.push(statement);
+
+            match self.tokens.get(self.pos) {
+                Some(Token::Semicolon) => self.pos += 1,
+                None => break,
+                _ => panic!("Expected ';' between statements"),
+            }
+        }
+
+        program
     }
 
     fn parse_statement(&mut self) -> Expression {
@@ -194,9 +214,40 @@ mod tests {
                 Token::Equals,
                 Token::Number(15)
             ]),
-            Expression::Assign {
-                name: "test".to_string(),
-                value: Box::new(Expression::Number(15))
+            Program {
+                expressions: vec![Expression::Assign {
+                    name: "test".to_string(),
+                    value: Box::new(Expression::Number(15))
+                }]
+            }
+        )
+    }
+
+    #[test]
+    fn multiple_statements() {
+        assert_eq!(
+            parse(&vec![
+                Token::Remember,
+                Token::Identifier("test".to_string()),
+                Token::Equals,
+                Token::Number(15),
+                Token::Semicolon,
+                Token::Identifier("test".to_string()),
+                Token::Operation(Operation::Add),
+                Token::Number(5),
+            ]),
+            Program {
+                expressions: vec![
+                    Expression::Assign {
+                        name: "test".to_string(),
+                        value: Box::new(Expression::Number(15))
+                    },
+                    Expression::Binary {
+                        left: Box::new(Expression::Variable("test".to_string())),
+                        operation: Operation::Add,
+                        right: Box::new(Expression::Number(5)),
+                    }
+                ]
             }
         )
     }
