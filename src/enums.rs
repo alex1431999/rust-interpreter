@@ -34,4 +34,5 @@ pub enum Token {
     Identifier(String),
     Equals,
     Remember,
+    Semicolon,
 }
