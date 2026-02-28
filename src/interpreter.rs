@@ -207,4 +207,9 @@ mod tests {
         assert_eq!(execute_interpreter("yell(5 + 5)"), 0);
         assert_eq!(execute_interpreter("yell(5 + 5); 10 + 10"), 20)
     }
+    #[test]
+    #[should_panic]
+    fn yell_without_parentheses() {
+        execute_interpreter("yell 5 + 5");
+    }
 }
