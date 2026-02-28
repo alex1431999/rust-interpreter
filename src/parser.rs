@@ -272,4 +272,21 @@ mod tests {
             }
         )
     }
+
+    #[test]
+    fn yell() {
+        assert_eq!(
+            parse(&vec![
+                Token::Yell,
+                Token::ParenthesesOpen,
+                Token::Number(5),
+                Token::ParenthesesClosed,
+            ]),
+            Program {
+                expressions: vec![Expression::Yell {
+                    expression: Box::new(Expression::Number(5))
+                },]
+            }
+        )
+    }
 }
