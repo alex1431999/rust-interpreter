@@ -69,6 +69,14 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> i64 {
             .values
             .get(name)
             .unwrap_or_else(|| panic!("Undefined variable '{}'", name)),
+
+        Expression::Yell { expression } => {
+            let value_evaluated = interpret_expression(expression, env);
+            println!("{}", value_evaluated);
+
+            // 0 just means the program has run successfully
+            0
+        }
     }
 }
 
@@ -192,5 +200,10 @@ mod tests {
     #[test]
     fn multiple_statements() {
         assert_eq!(execute_interpreter("remember x = 5; x + 5"), 10)
+    }
+
+    #[test]
+    fn yell() {
+        assert_eq!(execute_interpreter("yell(5 + 5)"), 0)
     }
 }

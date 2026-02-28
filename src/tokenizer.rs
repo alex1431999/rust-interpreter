@@ -86,6 +86,7 @@ impl<'a> Tokenizer<'a> {
 
             let token = match identifier.as_str() {
                 "remember" => Token::Remember,
+                "yell" => Token::Yell,
                 _ => Token::Identifier(identifier),
             };
             self.tokens.push(token);

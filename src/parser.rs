@@ -47,6 +47,7 @@ impl<'a> Parser<'a> {
     fn parse_statement(&mut self) -> Expression {
         match self.tokens.get(self.pos) {
             Some(Token::Remember) => self.parse_declaration(),
+            Some(Token::Yell) => self.parse_yell(),
             _ => self.parse_assignment(),
         }
     }
@@ -72,6 +73,20 @@ impl<'a> Parser<'a> {
         Expression::Assign {
             name,
             value: Box::new(value),
+        }
+    }
+
+    fn parse_yell(&mut self) -> Expression {
+        self.pos += 1;
+
+        if self.tokens.get(self.pos) != Some(&Token::ParenthesesOpen) {
+            panic!("Expected open parentheses after yell call")
+        }
+
+        let expression = self.parse_expression();
+
+        Expression::Yell {
+            expression: Box::new(expression),
         }
     }
 

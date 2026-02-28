@@ -6,6 +6,9 @@ pub enum Expression {
         name: String,
         value: Box<Expression>,
     },
+    Yell {
+        expression: Box<Expression>,
+    },
     Binary {
         left: Box<Expression>,
         operation: Operation,
@@ -35,4 +38,5 @@ pub enum Token {
     Equals,
     Remember,
     Semicolon,
+    Yell,
 }
