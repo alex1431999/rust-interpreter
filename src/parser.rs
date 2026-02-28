@@ -82,8 +82,14 @@ impl<'a> Parser<'a> {
         if self.tokens.get(self.pos) != Some(&Token::ParenthesesOpen) {
             panic!("Expected '(' after yell call")
         }
+        self.pos += 1;
 
         let expression = self.parse_expression();
+
+        if self.tokens.get(self.pos) != Some(&Token::ParenthesesClosed) {
+            panic!("Expected ')' after yell call")
+        }
+        self.pos += 1;
 
         Expression::Yell {
             expression: Box::new(expression),
