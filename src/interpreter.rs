@@ -4,8 +4,27 @@ use crate::parser::Program;
 use crate::{parser, tokenizer};
 use std::collections::HashMap;
 
+// TODO move environment to its own file
+#[derive(Clone)]
 struct Environment {
     values: HashMap<String, i64>,
+    parent: Option<Box<Environment>>,
+}
+
+impl Environment {
+    fn get(&self, name: &str) -> Option<i64> {
+        if let Some(value) = self.values.get(name) {
+            Some(*value)
+        } else if let Some(parent) = &self.parent {
+            parent.get(name)
+        } else {
+            None
+        }
+    }
+
+    fn set(&mut self, name: String, value: i64) {
+        self.values.insert(name, value);
+    }
 }
 
 pub fn execute_interpreter(input: &str) -> i64 {
@@ -15,6 +34,7 @@ pub fn execute_interpreter(input: &str) -> i64 {
 
     let mut env = Environment {
         values: HashMap::new(),
+        parent: None,
     };
     interpret(&ast, &mut env)
 }
@@ -61,12 +81,11 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> i64 {
         }
         Expression::Assign { name, value } => {
             let value_evaluated = interpret_expression(value, env);
-            env.values.insert(name.clone(), value_evaluated);
+            env.set(name.clone(), value_evaluated);
             value_evaluated
         }
 
-        Expression::Variable(name) => *env
-            .values
+        Expression::Variable(name) => env
             .get(name)
             .unwrap_or_else(|| panic!("Undefined variable '{}'", name)),
 
@@ -76,6 +95,19 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> i64 {
 
             // 0 just means the program has run successfully
             0
+        }
+        Expression::Block { expressions } => {
+            let mut result: i64 = 0;
+            let mut child_env = Environment {
+                values: HashMap::new(),
+                parent: Some(Box::new(env.clone())),
+            };
+
+            for expression in expressions {
+                result = interpret_expression(expression, &mut child_env)
+            }
+
+            result
         }
     }
 }
@@ -211,5 +243,21 @@ mod tests {
     #[should_panic]
     fn yell_without_parentheses() {
         execute_interpreter("yell 5 + 5");
+    }
+
+    #[test]
+    fn block_scoping() {
+        assert_eq!(
+            execute_interpreter("{ remember x = 5; { remember x = 10; x }; x }"),
+            5
+        );
+
+        assert_eq!(execute_interpreter("{ 5 + 5; { 10 + 10; }; }"), 20);
+    }
+
+    #[test]
+    #[should_panic]
+    fn variable_does_not_escape_scope() {
+        execute_interpreter("{ remember x = 5; }; x");
     }
 }

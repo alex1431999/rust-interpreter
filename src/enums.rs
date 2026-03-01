@@ -2,6 +2,9 @@
 pub enum Expression {
     Number(i64),
     Variable(String),
+    Block {
+        expressions: Vec<Expression>,
+    },
     Assign {
         name: String,
         value: Box<Expression>,
@@ -39,4 +42,6 @@ pub enum Token {
     Remember,
     Semicolon,
     Yell,
+    BlockOpen,
+    BlockClosed,
 }

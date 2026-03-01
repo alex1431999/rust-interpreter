@@ -109,6 +109,8 @@ impl<'a> Tokenizer<'a> {
             ')' => self.tokens.push(Token::ParenthesesClosed),
             '=' => self.tokens.push(Token::Equals),
             ';' => self.tokens.push(Token::Semicolon),
+            '{' => self.tokens.push(Token::BlockOpen),
+            '}' => self.tokens.push(Token::BlockClosed),
             _ => return false,
         }
 
