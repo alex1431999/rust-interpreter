@@ -46,4 +46,5 @@ pub enum Token {
     BlockClosed,
     True,
     False,
+    If,
 }

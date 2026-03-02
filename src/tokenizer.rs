@@ -89,6 +89,7 @@ impl<'a> Tokenizer<'a> {
                 "yell" => Token::Yell,
                 "true" => Token::True,
                 "false" => Token::False,
+                "if" => Token::If,
                 _ => Token::Identifier(identifier),
             };
             self.tokens.push(token);
@@ -216,5 +217,10 @@ mod tests {
     #[test]
     fn true_and_false() {
         assert_eq!(tokenize("true false"), vec![Token::True, Token::False])
+    }
+
+    #[test]
+    fn if_support() {
+        assert_eq!(tokenize("if"), vec![Token::If])
     }
 }
