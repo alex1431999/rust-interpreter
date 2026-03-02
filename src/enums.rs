@@ -44,4 +44,6 @@ pub enum Token {
     Yell,
     BlockOpen,
     BlockClosed,
+    True,
+    False,
 }

@@ -87,6 +87,8 @@ impl<'a> Tokenizer<'a> {
             let token = match identifier.as_str() {
                 "remember" => Token::Remember,
                 "yell" => Token::Yell,
+                "true" => Token::True,
+                "false" => Token::False,
                 _ => Token::Identifier(identifier),
             };
             self.tokens.push(token);
@@ -209,5 +211,10 @@ mod tests {
                 Token::Number(5)
             ]
         )
+    }
+
+    #[test]
+    fn true_and_false() {
+        assert_eq!(tokenize("true false"), vec![Token::True, Token::False])
     }
 }
