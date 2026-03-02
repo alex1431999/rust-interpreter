@@ -10,5 +10,5 @@ fn main() {
 
     let result = interpreter::execute_interpreter(code_to_execute.as_str());
 
-    println!("{}", result)
+    println!("{:?}", result)
 }

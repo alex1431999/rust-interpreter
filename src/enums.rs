@@ -21,6 +21,10 @@ pub enum Expression {
         operation: Operation,
         expression: Box<Expression>,
     },
+    If {
+        condition: Box<Expression>,
+        block: Box<Expression>,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

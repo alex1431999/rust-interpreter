@@ -7,12 +7,12 @@ use std::collections::HashMap;
 // TODO move environment to its own file
 #[derive(Clone)]
 struct Environment {
-    values: HashMap<String, i64>,
+    values: HashMap<String, Value>,
     parent: Option<Box<Environment>>,
 }
 
 impl Environment {
-    fn get(&self, name: &str) -> Option<i64> {
+    fn get(&self, name: &str) -> Option<Value> {
         if let Some(value) = self.values.get(name) {
             Some(*value)
         } else if let Some(parent) = &self.parent {
@@ -22,12 +22,18 @@ impl Environment {
         }
     }
 
-    fn set(&mut self, name: String, value: i64) {
+    fn set(&mut self, name: String, value: Value) {
         self.values.insert(name, value);
     }
 }
 
-pub fn execute_interpreter(input: &str) -> i64 {
+#[derive(Clone, Debug, PartialEq, Copy)]
+pub enum Value {
+    Number(i64),
+    Boolean(bool),
+}
+
+pub fn execute_interpreter(input: &str) -> Value {
     let tokens = tokenizer::tokenize(input);
 
     let ast = parser::parse(&tokens);
@@ -39,8 +45,8 @@ pub fn execute_interpreter(input: &str) -> i64 {
     interpret(&ast, &mut env)
 }
 
-fn interpret(program: &Program, env: &mut Environment) -> i64 {
-    let mut result: i64 = 0;
+fn interpret(program: &Program, env: &mut Environment) -> Value {
+    let mut result: Value = Value::Number(0);
 
     for expression in &program.expressions {
         result = interpret_expression(&expression, env)
@@ -49,9 +55,9 @@ fn interpret(program: &Program, env: &mut Environment) -> i64 {
     result
 }
 
-fn interpret_expression(expression: &Expression, env: &mut Environment) -> i64 {
+fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value {
     match expression {
-        Expression::Number(n) => *n,
+        Expression::Number(n) => Value::Number(*n),
         Expression::Binary {
             left,
             operation,
@@ -60,11 +66,27 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> i64 {
             let left_evaluated = interpret_expression(left, env);
             let right_evaluated = interpret_expression(right, env);
 
-            match operation {
-                Operation::Add => left_evaluated + right_evaluated,
-                Operation::Subtract => left_evaluated - right_evaluated,
-                Operation::Multiply => left_evaluated * right_evaluated,
-                Operation::Divide => left_evaluated / right_evaluated,
+            if let Value::Number(left_evaluated_number) = left_evaluated {
+                if let Value::Number(right_evaluated_number) = right_evaluated {
+                    match operation {
+                        Operation::Add => {
+                            Value::Number(left_evaluated_number + right_evaluated_number)
+                        }
+                        Operation::Subtract => {
+                            Value::Number(left_evaluated_number - right_evaluated_number)
+                        }
+                        Operation::Multiply => {
+                            Value::Number(left_evaluated_number * right_evaluated_number)
+                        }
+                        Operation::Divide => {
+                            Value::Number(left_evaluated_number / right_evaluated_number)
+                        }
+                    }
+                } else {
+                    panic!("Right side of numeric operation is not numeric")
+                }
+            } else {
+                panic!("The transpiler does not currently support non numeric binary expressions")
             }
         }
         Expression::Unary {
@@ -73,15 +95,19 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> i64 {
         } => {
             let expression_evaluated = interpret_expression(expression, env);
 
-            match operation {
-                Operation::Add => expression_evaluated,
-                Operation::Subtract => expression_evaluated * -1,
-                _ => panic!("You can only use add an subtract for unary operators"),
+            if let Value::Number(expression_evaluated_number) = expression_evaluated {
+                match operation {
+                    Operation::Add => Value::Number(expression_evaluated_number),
+                    Operation::Subtract => Value::Number(expression_evaluated_number * -1),
+                    _ => panic!("You can only use add an subtract for unary operators"),
+                }
+            } else {
+                panic!("Right side of numeric operation is not numeric")
             }
         }
         Expression::Assign { name, value } => {
             let value_evaluated = interpret_expression(value, env);
-            env.set(name.clone(), value_evaluated);
+            env.set(name.clone(), value_evaluated.clone());
             value_evaluated
         }
 
@@ -91,13 +117,13 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> i64 {
 
         Expression::Yell { expression } => {
             let value_evaluated = interpret_expression(expression, env);
-            println!("{}", value_evaluated);
+            println!("{:?}", value_evaluated);
 
             // 0 just means the program has run successfully
-            0
+            Value::Number(0)
         }
         Expression::Block { expressions } => {
-            let mut result: i64 = 0;
+            let mut result: Value = Value::Number(0);
             let mut child_env = Environment {
                 values: HashMap::new(),
                 parent: Some(Box::new(env.clone())),
@@ -109,6 +135,19 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> i64 {
 
             result
         }
+        Expression::If { condition, block } => {
+            let condition_evaluated = interpret_expression(condition, env);
+
+            if let Value::Boolean(condition_evaluated_number) = condition_evaluated {
+                if condition_evaluated_number {
+                    interpret_expression(block, env)
+                } else {
+                    Value::Number(0)
+                }
+            } else {
+                panic!("If statements need to evaluate to a boolean")
+            }
+        }
     }
 }
 
@@ -118,75 +157,81 @@ mod tests {
 
     #[test]
     fn basic_addition() {
-        assert_eq!(execute_interpreter("5 + 5"), 10)
+        assert_eq!(execute_interpreter("5 + 5"), Value::Number(10))
     }
 
     #[test]
     fn three_numbers_addition() {
-        assert_eq!(execute_interpreter("5 + 5 + 5"), 15)
+        assert_eq!(execute_interpreter("5 + 5 + 5"), Value::Number(15))
     }
 
     #[test]
     fn basic_subtraction() {
-        assert_eq!(execute_interpreter("5 - 5"), 0)
+        assert_eq!(execute_interpreter("5 - 5"), Value::Number(0))
     }
 
     #[test]
     fn subtraction_advanced() {
         // This makes sure we aren't just resolving from righ to left but respecting math rules
-        assert_eq!(execute_interpreter("5 - 5 - 5"), -5)
+        assert_eq!(execute_interpreter("5 - 5 - 5"), Value::Number(-5))
     }
 
     #[test]
     fn multiplication() {
-        assert_eq!(execute_interpreter("5 * 5"), 25)
+        assert_eq!(execute_interpreter("5 * 5"), Value::Number(25))
     }
 
     #[test]
     fn multiplication_advanced() {
         // This test makes sure we are respecting math rules and aren't just evaluating from left
         // to right. In this case the equation should be evaluate as 3 + (5 * 5)
-        assert_eq!(execute_interpreter("3 + 5 * 5"), 28)
+        assert_eq!(execute_interpreter("3 + 5 * 5"), Value::Number(28))
     }
 
     #[test]
     fn division() {
-        assert_eq!(execute_interpreter("10 / 2"), 5)
+        assert_eq!(execute_interpreter("10 / 2"), Value::Number(5))
     }
 
     #[test]
     fn division_advanced() {
-        assert_eq!(execute_interpreter("3 + 10 / 5"), 5)
+        assert_eq!(execute_interpreter("3 + 10 / 5"), Value::Number(5))
     }
 
     #[test]
     fn equation_advanced() {
-        assert_eq!(execute_interpreter("3 + 10 / 5 * 10 - 10 / 2"), 18)
+        assert_eq!(
+            execute_interpreter("3 + 10 / 5 * 10 - 10 / 2"),
+            Value::Number(18)
+        )
     }
 
     #[test]
     fn white_space() {
-        assert_eq!(execute_interpreter("5     +   5"), 10)
+        assert_eq!(execute_interpreter("5     +   5"), Value::Number(10))
     }
 
     #[test]
     fn missing_white_space() {
-        assert_eq!(execute_interpreter("5+5"), 10)
+        assert_eq!(execute_interpreter("5+5"), Value::Number(10))
     }
 
     #[test]
     fn parentheses() {
-        assert_eq!(execute_interpreter("2 * (5 + 5)"), 20)
+        assert_eq!(execute_interpreter("2 * (5 + 5)"), Value::Number(20))
     }
 
     #[test]
     fn multiple_parentheses() {
-        assert_eq!(execute_interpreter("2 * (5 + 5) * (5 + 5)"), 200)
+        assert_eq!(
+            execute_interpreter("2 * (5 + 5) * (5 + 5)"),
+            Value::Number(200)
+        )
     }
 
     #[test]
     fn nested_parentheses() {
-        assert_eq!(execute_interpreter("2 * (3 + (4 * 5))"), 46);
+        assert_eq!(execute_interpreter("2 * (3 + (4 * 5))"), Value::Number(46));
     }
 
     #[test]
@@ -203,11 +248,11 @@ mod tests {
 
     #[test]
     fn unary_expressions() {
-        assert_eq!(execute_interpreter("-5"), -5);
-        assert_eq!(execute_interpreter("--5"), 5);
-        assert_eq!(execute_interpreter("-(2 + 3)"), -5);
-        assert_eq!(execute_interpreter("-2 * 3"), -6);
-        assert_eq!(execute_interpreter("2 * -3"), -6);
+        assert_eq!(execute_interpreter("-5"), Value::Number(-5));
+        assert_eq!(execute_interpreter("--5"), Value::Number(5));
+        assert_eq!(execute_interpreter("-(2 + 3)"), Value::Number(-5));
+        assert_eq!(execute_interpreter("-2 * 3"), Value::Number(-6));
+        assert_eq!(execute_interpreter("2 * -3"), Value::Number(-6));
     }
 
     #[test]
@@ -218,9 +263,12 @@ mod tests {
 
     #[test]
     fn assignment() {
-        assert_eq!(execute_interpreter("remember x = 5"), 5);
-        assert_eq!(execute_interpreter("remember x = 5 + 5"), 10);
-        assert_eq!(execute_interpreter("remember x = 5 + 5 + 5"), 15);
+        assert_eq!(execute_interpreter("remember x = 5"), Value::Number(5));
+        assert_eq!(execute_interpreter("remember x = 5 + 5"), Value::Number(10));
+        assert_eq!(
+            execute_interpreter("remember x = 5 + 5 + 5"),
+            Value::Number(15)
+        );
     }
 
     #[test]
@@ -231,13 +279,19 @@ mod tests {
 
     #[test]
     fn multiple_statements() {
-        assert_eq!(execute_interpreter("remember x = 5; x + 5"), 10)
+        assert_eq!(
+            execute_interpreter("remember x = 5; x + 5"),
+            Value::Number(10)
+        )
     }
 
     #[test]
     fn yell() {
-        assert_eq!(execute_interpreter("yell(5 + 5)"), 0);
-        assert_eq!(execute_interpreter("yell(5 + 5); 10 + 10"), 20)
+        assert_eq!(execute_interpreter("yell(5 + 5)"), Value::Number(0));
+        assert_eq!(
+            execute_interpreter("yell(5 + 5); 10 + 10"),
+            Value::Number(20)
+        )
     }
     #[test]
     #[should_panic]
@@ -249,10 +303,13 @@ mod tests {
     fn block_scoping() {
         assert_eq!(
             execute_interpreter("{ remember x = 5; { remember x = 10; x }; x }"),
-            5
+            Value::Number(5)
         );
 
-        assert_eq!(execute_interpreter("{ 5 + 5; { 10 + 10; }; }"), 20);
+        assert_eq!(
+            execute_interpreter("{ 5 + 5; { 10 + 10; }; }"),
+            Value::Number(20)
+        );
     }
 
     #[test]
