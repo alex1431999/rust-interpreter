@@ -58,6 +58,7 @@ fn interpret(program: &Program, env: &mut Environment) -> Value {
 fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value {
     match expression {
         Expression::Number(n) => Value::Number(*n),
+        Expression::Boolean(boolean) => Value::Boolean(*boolean),
         Expression::Binary {
             left,
             operation,
@@ -316,5 +317,11 @@ mod tests {
     #[should_panic]
     fn variable_does_not_escape_scope() {
         execute_interpreter("{ remember x = 5; }; x");
+    }
+
+    #[test]
+    fn conditions() {
+        assert_eq!(execute_interpreter("if (true) { 5 }"), Value::Number(5));
+        assert_eq!(execute_interpreter("if (false) { 5 }"), Value::Number(0));
     }
 }

@@ -2,6 +2,7 @@
 pub enum Expression {
     Number(i64),
     Variable(String),
+    Boolean(bool),
     Block {
         expressions: Vec<Expression>,
     },

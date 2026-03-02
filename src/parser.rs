@@ -48,6 +48,7 @@ impl<'a> Parser<'a> {
         match self.tokens.get(self.pos) {
             Some(Token::Remember) => self.parse_declaration(),
             Some(Token::Yell) => self.parse_yell(),
+            Some(Token::If) => self.parse_if(),
             _ => self.parse_assignment(),
         }
     }
@@ -93,6 +94,37 @@ impl<'a> Parser<'a> {
 
         Expression::Yell {
             expression: Box::new(expression),
+        }
+    }
+
+    fn parse_if(&mut self) -> Expression {
+        self.pos += 1;
+
+        if self.tokens.get(self.pos) != Some(&Token::ParenthesesOpen) {
+            panic!("Expected '(' after if call")
+        }
+        self.pos += 1;
+
+        let condition = self.parse_expression();
+
+        if self.tokens.get(self.pos) != Some(&Token::ParenthesesClosed) {
+            panic!("Expected ')' after if call")
+        }
+        self.pos += 1;
+
+        if self.tokens.get(self.pos) != Some(&Token::BlockOpen) {
+            panic!("Expected '{{' after if condition")
+        }
+
+        let block = self.parse_statement();
+
+        // TODO we should probably check here that the last token was a closing block
+        //  or maybe we can check if the expression returned from parse_statement is of type
+        //  block
+
+        Expression::If {
+            condition: Box::new(condition),
+            block: Box::new(block),
         }
     }
 
@@ -192,6 +224,14 @@ impl<'a> Parser<'a> {
             Some(Token::Number(n)) => {
                 self.pos += 1;
                 Expression::Number(*n)
+            }
+            Some(Token::True) => {
+                self.pos += 1;
+                Expression::Boolean(true)
+            }
+            Some(Token::False) => {
+                self.pos += 1;
+                Expression::Boolean(false)
             }
             Some(Token::ParenthesesOpen) => {
                 self.pos += 1;
@@ -331,6 +371,36 @@ mod tests {
                         operation: Operation::Add,
                         right: Box::new(Expression::Number(5)),
                     }]
+                }]
+            }
+        )
+    }
+
+    #[test]
+    fn if_statement() {
+        assert_eq!(
+            parse(&vec![
+                Token::If,
+                Token::ParenthesesOpen,
+                Token::True,
+                Token::ParenthesesClosed,
+                Token::BlockOpen,
+                Token::Number(5),
+                Token::Operation(Operation::Add),
+                Token::Number(5),
+                Token::Semicolon,
+                Token::BlockClosed,
+            ]),
+            Program {
+                expressions: vec![Expression::If {
+                    condition: Box::new(Expression::Boolean(true)),
+                    block: Box::new(Expression::Block {
+                        expressions: vec![Expression::Binary {
+                            left: Box::new(Expression::Number(5)),
+                            operation: Operation::Add,
+                            right: Box::new(Expression::Number(5)),
+                        }]
+                    })
                 }]
             }
         )
