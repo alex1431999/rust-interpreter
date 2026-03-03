@@ -6,9 +6,9 @@ mod tokenizer;
 use std::fs;
 
 fn main() {
-    let code_to_execute = fs::read_to_string("./src/example.nali").unwrap();
+    let code_to_execute = "5 + 5";
 
-    let result = interpreter::execute_interpreter(code_to_execute.as_str());
+    let result = interpreter::execute_interpreter(code_to_execute);
 
     println!("{:?}", result)
 }
