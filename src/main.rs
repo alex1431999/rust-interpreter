@@ -1,4 +1,5 @@
 mod enums;
+mod environment;
 mod interpreter;
 mod parser;
 mod tokenizer;

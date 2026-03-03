@@ -1,31 +1,9 @@
 use crate::enums::Expression;
 use crate::enums::Operation;
+use crate::environment::Environment;
 use crate::parser::Program;
 use crate::{parser, tokenizer};
 use std::collections::HashMap;
-
-// TODO move environment to its own file
-#[derive(Clone)]
-struct Environment {
-    values: HashMap<String, Value>,
-    parent: Option<Box<Environment>>,
-}
-
-impl Environment {
-    fn get(&self, name: &str) -> Option<Value> {
-        if let Some(value) = self.values.get(name) {
-            Some(*value)
-        } else if let Some(parent) = &self.parent {
-            parent.get(name)
-        } else {
-            None
-        }
-    }
-
-    fn set(&mut self, name: String, value: Value) {
-        self.values.insert(name, value);
-    }
-}
 
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub enum Value {
