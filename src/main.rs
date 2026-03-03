@@ -4,8 +4,6 @@ mod interpreter;
 mod parser;
 mod tokenizer;
 
-use std::fs;
-
 fn main() {
     let code_to_execute = "5 + 5";
 
