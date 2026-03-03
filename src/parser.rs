@@ -112,10 +112,11 @@ impl<'a> Parser<'a> {
         }
         self.pos += 1;
 
-        let block = match self.parse_statement() {
-            Expression::Block { expressions } => Expression::Block { expressions },
-            _ => panic!("Expected a block expression after if statement"),
-        };
+        if self.tokens.get(self.pos) != Some(&Token::BlockOpen) {
+            panic!("Expected '{{' after if statement")
+        }
+
+        let block = self.parse_block();
 
         Expression::If {
             condition: Box::new(condition),
@@ -243,31 +244,33 @@ impl<'a> Parser<'a> {
                 self.pos += 1;
                 Expression::Variable(name.clone())
             }
-            Some(Token::BlockOpen) => {
-                self.pos += 1;
-                let mut expressions: Vec<Expression> = vec![];
-
-                while self.tokens.get(self.pos) != Some(&Token::BlockClosed) {
-                    let expression = self.parse_statement();
-                    expressions.push(expression);
-
-                    match self.tokens.get(self.pos) {
-                        Some(Token::Semicolon) => self.pos += 1,
-                        Some(Token::BlockClosed) => break,
-                        _ => panic!("Expected ';' or '}}' in block"),
-                    }
-                }
-
-                if (self.tokens.get(self.pos)) != Some(&Token::BlockClosed) {
-                    panic!("Expected '}}' to close block")
-                }
-
-                self.pos += 1;
-
-                Expression::Block { expressions }
-            }
+            Some(Token::BlockOpen) => self.parse_block(),
             _ => panic!("Unexpected token {:?} at position {}", token, self.pos),
         }
+    }
+
+    fn parse_block(&mut self) -> Expression {
+        self.pos += 1;
+        let mut expressions: Vec<Expression> = vec![];
+
+        while self.tokens.get(self.pos) != Some(&Token::BlockClosed) {
+            let expression = self.parse_statement();
+            expressions.push(expression);
+
+            match self.tokens.get(self.pos) {
+                Some(Token::Semicolon) => self.pos += 1,
+                Some(Token::BlockClosed) => break,
+                _ => panic!("Expected ';' or '}}' in block"),
+            }
+        }
+
+        if (self.tokens.get(self.pos)) != Some(&Token::BlockClosed) {
+            panic!("Expected '}}' to close block")
+        }
+
+        self.pos += 1;
+
+        Expression::Block { expressions }
     }
 }
 
