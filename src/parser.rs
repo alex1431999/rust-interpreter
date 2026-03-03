@@ -112,15 +112,10 @@ impl<'a> Parser<'a> {
         }
         self.pos += 1;
 
-        if self.tokens.get(self.pos) != Some(&Token::BlockOpen) {
-            panic!("Expected '{{' after if condition")
-        }
-
-        let block = self.parse_statement();
-
-        // TODO we should probably check here that the last token was a closing block
-        //  or maybe we can check if the expression returned from parse_statement is of type
-        //  block
+        let block = match self.parse_statement() {
+            Expression::Block { expressions } => Expression::Block { expressions },
+            _ => panic!("Expected a block expression after if statement"),
+        };
 
         Expression::If {
             condition: Box::new(condition),
@@ -404,5 +399,17 @@ mod tests {
                 }]
             }
         )
+    }
+
+    #[test]
+    #[should_panic]
+    fn if_statement_invalid() {
+        // The if statement is missing a block
+        parse(&vec![
+            Token::If,
+            Token::ParenthesesOpen,
+            Token::True,
+            Token::ParenthesesClosed,
+        ]);
     }
 }
