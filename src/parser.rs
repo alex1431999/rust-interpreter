@@ -64,10 +64,7 @@ impl<'a> Parser<'a> {
             _ => panic!("Expected identifier after remember"),
         };
 
-        if self.tokens.get(self.pos) != Some(&Token::Equals) {
-            panic!("Expected '=' after identifier")
-        }
-        self.pos += 1;
+        self.consume(&Token::Equals);
 
         let value = self.parse_expression();
 
@@ -80,17 +77,9 @@ impl<'a> Parser<'a> {
     fn parse_yell(&mut self) -> Expression {
         self.pos += 1;
 
-        if self.tokens.get(self.pos) != Some(&Token::ParenthesesOpen) {
-            panic!("Expected '(' after yell call")
-        }
-        self.pos += 1;
-
+        self.consume(&Token::ParenthesesOpen);
         let expression = self.parse_expression();
-
-        if self.tokens.get(self.pos) != Some(&Token::ParenthesesClosed) {
-            panic!("Expected ')' after yell call")
-        }
-        self.pos += 1;
+        self.consume(&Token::ParenthesesClosed);
 
         Expression::Yell {
             expression: Box::new(expression),
@@ -100,17 +89,9 @@ impl<'a> Parser<'a> {
     fn parse_if(&mut self) -> Expression {
         self.pos += 1;
 
-        if self.tokens.get(self.pos) != Some(&Token::ParenthesesOpen) {
-            panic!("Expected '(' after if call")
-        }
-        self.pos += 1;
-
+        self.consume(&Token::ParenthesesOpen);
         let condition = self.parse_expression();
-
-        if self.tokens.get(self.pos) != Some(&Token::ParenthesesClosed) {
-            panic!("Expected ')' after if call")
-        }
-        self.pos += 1;
+        self.consume(&Token::ParenthesesClosed);
 
         if self.tokens.get(self.pos) != Some(&Token::BlockOpen) {
             panic!("Expected '{{' after if statement")
@@ -232,13 +213,9 @@ impl<'a> Parser<'a> {
             Some(Token::ParenthesesOpen) => {
                 self.pos += 1;
                 let expression = self.parse_expression();
+                self.consume(&Token::ParenthesesClosed);
 
-                if let Some(Token::ParenthesesClosed) = self.tokens.get(self.pos) {
-                    self.pos += 1;
-                    expression
-                } else {
-                    panic!("Expected ')', found {:?}", self.tokens.get(self.pos));
-                }
+                expression
             }
             Some(Token::Identifier(name)) => {
                 self.pos += 1;
@@ -264,13 +241,18 @@ impl<'a> Parser<'a> {
             }
         }
 
-        if (self.tokens.get(self.pos)) != Some(&Token::BlockClosed) {
-            panic!("Expected '}}' to close block")
+        self.consume(&Token::BlockClosed);
+
+        Expression::Block { expressions }
+    }
+
+    fn consume(&mut self, token: &Token) {
+        let token_resolved = self.tokens.get(self.pos);
+        if token_resolved != Some(token) {
+            panic!("Expected {:?} but got ${:?} instead", token, token_resolved)
         }
 
         self.pos += 1;
-
-        Expression::Block { expressions }
     }
 }
 
