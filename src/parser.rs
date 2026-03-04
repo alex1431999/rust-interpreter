@@ -93,10 +93,6 @@ impl<'a> Parser<'a> {
         let condition = self.parse_expression();
         self.consume(&Token::ParenthesesClosed);
 
-        if self.tokens.get(self.pos) != Some(&Token::BlockOpen) {
-            panic!("Expected '{{' after if statement")
-        }
-
         let success_expression = self.parse_block();
 
         if self.tokens.get(self.pos) == Some(&Token::Else) {
@@ -240,7 +236,8 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_block(&mut self) -> Expression {
-        self.pos += 1;
+        self.consume(&Token::BlockOpen);
+
         let mut expressions: Vec<Expression> = vec![];
 
         while self.tokens.get(self.pos) != Some(&Token::BlockClosed) {
