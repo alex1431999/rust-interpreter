@@ -97,11 +97,24 @@ impl<'a> Parser<'a> {
             panic!("Expected '{{' after if statement")
         }
 
-        let block = self.parse_block();
+        let success_expression = self.parse_block();
 
-        Expression::If {
-            condition: Box::new(condition),
-            block: Box::new(block),
+        if self.tokens.get(self.pos) == Some(&Token::Else) {
+            self.consume(&Token::Else);
+
+            let failure_expression = self.parse_block();
+
+            Expression::If {
+                condition: Box::new(condition),
+                success_expression: Box::new(success_expression),
+                failure_expression: Some(Box::new(failure_expression)),
+            }
+        } else {
+            Expression::If {
+                condition: Box::new(condition),
+                success_expression: Box::new(success_expression),
+                failure_expression: None,
+            }
         }
     }
 
@@ -370,17 +383,31 @@ mod tests {
                 Token::Number(5),
                 Token::Semicolon,
                 Token::BlockClosed,
+                Token::Else,
+                Token::BlockOpen,
+                Token::Number(10),
+                Token::Operation(Operation::Add),
+                Token::Number(10),
+                Token::Semicolon,
+                Token::BlockClosed,
             ]),
             Program {
                 expressions: vec![Expression::If {
                     condition: Box::new(Expression::Boolean(true)),
-                    block: Box::new(Expression::Block {
+                    success_expression: Box::new(Expression::Block {
                         expressions: vec![Expression::Binary {
                             left: Box::new(Expression::Number(5)),
                             operation: Operation::Add,
                             right: Box::new(Expression::Number(5)),
                         }]
-                    })
+                    },),
+                    failure_expression: Some(Box::new(Expression::Block {
+                        expressions: vec![Expression::Binary {
+                            left: Box::new(Expression::Number(10)),
+                            operation: Operation::Add,
+                            right: Box::new(Expression::Number(10)),
+                        }]
+                    },))
                 }]
             }
         )

@@ -90,6 +90,7 @@ impl<'a> Tokenizer<'a> {
                 "true" => Token::True,
                 "false" => Token::False,
                 "if" => Token::If,
+                "else" => Token::Else,
                 _ => Token::Identifier(identifier),
             };
             self.tokens.push(token);

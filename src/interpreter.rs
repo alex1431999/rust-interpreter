@@ -114,12 +114,18 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value
 
             result
         }
-        Expression::If { condition, block } => {
+        Expression::If {
+            condition,
+            success_expression,
+            failure_expression,
+        } => {
             let condition_evaluated = interpret_expression(condition, env);
 
-            if let Value::Boolean(condition_evaluated_number) = condition_evaluated {
-                if condition_evaluated_number {
-                    interpret_expression(block, env)
+            if let Value::Boolean(condition_evaluated_resolved) = condition_evaluated {
+                if condition_evaluated_resolved {
+                    interpret_expression(success_expression, env)
+                } else if let Some(failure_expression_resolved) = failure_expression {
+                    interpret_expression(failure_expression_resolved, env)
                 } else {
                     Value::Number(0)
                 }
@@ -301,5 +307,9 @@ mod tests {
     fn conditions() {
         assert_eq!(execute_interpreter("if (true) { 5 }"), Value::Number(5));
         assert_eq!(execute_interpreter("if (false) { 5 }"), Value::Number(0));
+        assert_eq!(
+            execute_interpreter("if (false) { 5 } else { 10 }"),
+            Value::Number(10)
+        );
     }
 }

@@ -24,7 +24,8 @@ pub enum Expression {
     },
     If {
         condition: Box<Expression>,
-        block: Box<Expression>,
+        success_expression: Box<Expression>,
+        failure_expression: Option<Box<Expression>>,
     },
 }
 
@@ -52,4 +53,5 @@ pub enum Token {
     True,
     False,
     If,
+    Else,
 }
