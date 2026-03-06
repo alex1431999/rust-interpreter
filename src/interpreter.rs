@@ -1,5 +1,5 @@
-use crate::enums::Expression;
 use crate::enums::Operation;
+use crate::enums::{Comparator, Expression};
 use crate::environment::Environment;
 use crate::parser::Program;
 use crate::{parser, tokenizer};
@@ -131,6 +131,18 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value
                 }
             } else {
                 panic!("If statements need to evaluate to a boolean")
+            }
+        }
+        Expression::Comparison {
+            left,
+            comparator,
+            right,
+        } => {
+            let left_evaluated = interpret_expression(left, env);
+            let right_evaluated = interpret_expression(right, env);
+
+            match comparator {
+                Comparator::Equality => Value::Boolean(left_evaluated == right_evaluated),
             }
         }
     }
@@ -311,5 +323,10 @@ mod tests {
             execute_interpreter("if (false) { 5 } else { 10 }"),
             Value::Number(10)
         );
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(execute_interpreter("5 == 5"), Value::Boolean(true));
     }
 }

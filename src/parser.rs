@@ -119,7 +119,7 @@ impl<'a> Parser<'a> {
         identifier -> Equals -> expression
      */
     fn parse_assignment(&mut self) -> Expression {
-        let expression = self.parse_expression();
+        let expression = self.parse_comparator();
 
         if let Expression::Variable(ref name) = expression {
             if let Some(Token::Equals) = self.tokens.get(self.pos) {
@@ -133,6 +133,24 @@ impl<'a> Parser<'a> {
         }
 
         expression
+    }
+
+    // TODO this is probably incorrectly placed, the function should work but we need to call it
+    //  from somewhere else
+    fn parse_comparator(&mut self) -> Expression {
+        let left = self.parse_expression();
+
+        if let Some(Token::Comparator(comparator)) = self.tokens.get(self.pos) {
+            let right = self.parse_expression();
+
+            Expression::Comparison {
+                left: Box::new(left),
+                comparator: *comparator,
+                right: Box::new(right),
+            }
+        } else {
+            left
+        }
     }
 
     fn parse_expression(&mut self) -> Expression {

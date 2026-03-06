@@ -1,4 +1,4 @@
-use crate::enums::{Operation, Token};
+use crate::enums::{Comparator, Operation, Token};
 
 struct Tokenizer<'a> {
     characters: &'a [char],
@@ -114,7 +114,7 @@ impl<'a> Tokenizer<'a> {
         let next_character = self.get_next_character();
 
         if character == '=' && next_character == '=' {
-            self.tokens.push(Token::Equality);
+            self.tokens.push(Token::Comparator(Comparator::Equality));
             self.advance(2);
             true
         } else {
@@ -256,6 +256,9 @@ mod tests {
 
     #[test]
     fn equality_support() {
-        assert_eq!(tokenize("=="), vec![Token::Equality])
+        assert_eq!(
+            tokenize("=="),
+            vec![Token::Comparator(Comparator::Equality)]
+        )
     }
 }

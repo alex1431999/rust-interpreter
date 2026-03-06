@@ -27,6 +27,11 @@ pub enum Expression {
         success_expression: Box<Expression>,
         failure_expression: Option<Box<Expression>>,
     },
+    Comparison {
+        left: Box<Expression>,
+        comparator: Comparator,
+        right: Box<Expression>,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -35,6 +40,10 @@ pub enum Operation {
     Subtract,
     Multiply,
     Divide,
+}
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Comparator {
+    Equality,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -45,7 +54,6 @@ pub enum Token {
     ParenthesesClosed,
     Identifier(String),
     Equals,
-    Equality,
     Remember,
     Semicolon,
     Yell,
@@ -55,4 +63,5 @@ pub enum Token {
     False,
     If,
     Else,
+    Comparator(Comparator),
 }
