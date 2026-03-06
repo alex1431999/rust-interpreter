@@ -90,7 +90,7 @@ impl<'a> Parser<'a> {
         self.pos += 1;
 
         self.consume(&Token::ParenthesesOpen);
-        let condition = self.parse_expression();
+        let condition = self.parse_comparator();
         self.consume(&Token::ParenthesesClosed);
 
         let success_expression = self.parse_block();
