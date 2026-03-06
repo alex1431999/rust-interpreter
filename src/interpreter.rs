@@ -324,6 +324,10 @@ mod tests {
             Value::Number(10)
         );
         assert_eq!(execute_interpreter("if (5 == 5) { 5 }"), Value::Number(5));
+        assert_eq!(
+            execute_interpreter("remember x = 5; if (x + 5 == 10) { 5 }"),
+            Value::Number(5)
+        );
     }
 
     #[test]
