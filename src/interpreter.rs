@@ -328,5 +328,10 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(execute_interpreter("5 == 5"), Value::Boolean(true));
+        assert_eq!(execute_interpreter("5 == 4"), Value::Boolean(false));
+        assert_eq!(execute_interpreter("true == true"), Value::Boolean(true));
+        assert_eq!(execute_interpreter("true == false"), Value::Boolean(false));
+        assert_eq!(execute_interpreter("false == false"), Value::Boolean(true));
+        assert_eq!(execute_interpreter("5 == true"), Value::Boolean(false));
     }
 }
