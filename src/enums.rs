@@ -45,6 +45,7 @@ pub enum Token {
     ParenthesesClosed,
     Identifier(String),
     Equals,
+    Equality,
     Remember,
     Semicolon,
     Yell,

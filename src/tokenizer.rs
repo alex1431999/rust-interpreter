@@ -28,6 +28,10 @@ impl<'a> Tokenizer<'a> {
                 continue;
             }
 
+            if self.process_equality() {
+                continue;
+            }
+
             if self.process_identifier() {
                 continue;
             }
@@ -101,6 +105,23 @@ impl<'a> Tokenizer<'a> {
         false
     }
 
+    fn process_equality(&mut self) -> bool {
+        if self.characters_left() < 2 {
+            return false;
+        }
+
+        let character = self.get_current_character();
+        let next_character = self.get_next_character();
+
+        if character == '=' && next_character == '=' {
+            self.tokens.push(Token::Equality);
+            self.advance(2);
+            true
+        } else {
+            false
+        }
+    }
+
     fn process_basic_tokens(&mut self) -> bool {
         let character = self.get_current_character();
 
@@ -127,8 +148,16 @@ impl<'a> Tokenizer<'a> {
         self.characters[self.pos]
     }
 
+    fn get_next_character(&self) -> char {
+        self.characters[self.pos + 1]
+    }
+
     fn has_more(&self) -> bool {
         self.pos < self.characters.len()
+    }
+
+    fn characters_left(&self) -> usize {
+        self.characters.len() - self.pos
     }
 
     fn advance(&mut self, amount: usize) {
@@ -223,5 +252,10 @@ mod tests {
     #[test]
     fn if_support() {
         assert_eq!(tokenize("if"), vec![Token::If])
+    }
+
+    #[test]
+    fn equality_support() {
+        assert_eq!(tokenize("=="), vec![Token::Equality])
     }
 }
