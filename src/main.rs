@@ -1,3 +1,5 @@
+use std::env;
+
 mod enums;
 mod environment;
 mod interpreter;
@@ -5,9 +7,12 @@ mod parser;
 mod tokenizer;
 
 fn main() {
-    let code_to_execute = "5 + 5";
+    let args: Vec<String> = env::args().collect();
 
-    let result = interpreter::execute_interpreter(code_to_execute);
-
-    println!("{:?}", result)
+    if let Some(code_to_execute) = args.get(1) {
+        let result = interpreter::execute_interpreter(code_to_execute);
+        println!("{:?}", result);
+    } else {
+        println!("Usage: cargo run -- \"<your code here>\"");
+    }
 }
