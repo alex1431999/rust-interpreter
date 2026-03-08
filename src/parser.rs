@@ -15,8 +15,6 @@ pub fn parse(tokens: &[Token]) -> Program {
     let mut parser = Parser { tokens, pos: 0 };
     let ast = parser.parse_program();
 
-    println!("AST: {:?}", ast);
-
     if parser.pos != tokens.len() {
         panic!("Has not parsed the entire expression")
     }
