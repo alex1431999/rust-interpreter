@@ -143,28 +143,24 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value
 
             match comparator {
                 Comparator::Equality => Value::Boolean(left_evaluated == right_evaluated),
-                Comparator::GreaterThan => {
-                    if let Value::Number(left_evaluated_number) = left_evaluated {
-                        if let Value::Number(right_evaluated_number) = right_evaluated {
-                            Value::Boolean(left_evaluated_number > right_evaluated_number)
-                        } else {
-                            panic!("Right side of greater than comparison needs to be a number")
-                        }
-                    } else {
+                Comparator::GreaterThan => match (left_evaluated, right_evaluated) {
+                    (Value::Number(left), Value::Number(right)) => Value::Boolean(left > right),
+                    (Value::Number(_), _) => {
+                        panic!("Right side of greater than comparison needs to be a number")
+                    }
+                    (_, _) => {
                         panic!("Left side of greater than comparison needs to be a number")
                     }
-                }
-                Comparator::LessThan => {
-                    if let Value::Number(left_evaluated_number) = left_evaluated {
-                        if let Value::Number(right_evaluated_number) = right_evaluated {
-                            Value::Boolean(left_evaluated_number < right_evaluated_number)
-                        } else {
-                            panic!("Right side of less than comparison needs to be a number")
-                        }
-                    } else {
+                },
+                Comparator::LessThan => match (left_evaluated, right_evaluated) {
+                    (Value::Number(left), Value::Number(right)) => Value::Boolean(left < right),
+                    (Value::Number(_), _) => {
+                        panic!("Right side of less than comparison needs to be a number")
+                    }
+                    (_, _) => {
                         panic!("Left side of less than comparison needs to be a number")
                     }
-                }
+                },
             }
         }
     }
