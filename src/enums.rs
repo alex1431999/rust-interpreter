@@ -44,6 +44,8 @@ pub enum Operation {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Comparator {
     Equality,
+    LessThan,
+    GreaterThan,
 }
 
 #[derive(Debug, Clone, PartialEq)]

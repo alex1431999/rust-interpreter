@@ -143,6 +143,28 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value
 
             match comparator {
                 Comparator::Equality => Value::Boolean(left_evaluated == right_evaluated),
+                Comparator::GreaterThan => {
+                    if let Value::Number(left_evaluated_number) = left_evaluated {
+                        if let Value::Number(right_evaluated_number) = right_evaluated {
+                            Value::Boolean(left_evaluated_number > right_evaluated_number)
+                        } else {
+                            panic!("Right side of greater than comparison needs to be a number")
+                        }
+                    } else {
+                        panic!("Left side of greater than comparison needs to be a number")
+                    }
+                }
+                Comparator::LessThan => {
+                    if let Value::Number(left_evaluated_number) = left_evaluated {
+                        if let Value::Number(right_evaluated_number) = right_evaluated {
+                            Value::Boolean(left_evaluated_number < right_evaluated_number)
+                        } else {
+                            panic!("Right side of less than comparison needs to be a number")
+                        }
+                    } else {
+                        panic!("Left side of less than comparison needs to be a number")
+                    }
+                }
             }
         }
     }
@@ -338,5 +360,19 @@ mod tests {
         assert_eq!(execute_interpreter("true == false"), Value::Boolean(false));
         assert_eq!(execute_interpreter("false == false"), Value::Boolean(true));
         assert_eq!(execute_interpreter("5 == true"), Value::Boolean(false));
+    }
+
+    #[test]
+    fn comparators() {
+        assert_eq!(execute_interpreter("5 > 3"), Value::Boolean(true));
+        assert_eq!(execute_interpreter("5 < 3"), Value::Boolean(false));
+        assert_eq!(execute_interpreter("0 > 3"), Value::Boolean(false));
+        assert_eq!(execute_interpreter("0 < 3"), Value::Boolean(true));
+    }
+
+    #[test]
+    #[should_panic]
+    fn comparators_invalid() {
+        execute_interpreter("5 > true");
     }
 }

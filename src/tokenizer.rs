@@ -136,6 +136,8 @@ impl<'a> Tokenizer<'a> {
             ';' => self.tokens.push(Token::Semicolon),
             '{' => self.tokens.push(Token::BlockOpen),
             '}' => self.tokens.push(Token::BlockClosed),
+            '<' => self.tokens.push(Token::Comparator(Comparator::LessThan)),
+            '>' => self.tokens.push(Token::Comparator(Comparator::GreaterThan)),
             _ => return false,
         }
 
