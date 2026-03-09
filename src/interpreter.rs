@@ -385,4 +385,10 @@ mod tests {
             Value::String("hello".to_string())
         )
     }
+
+    #[test]
+    #[should_panic]
+    fn invalid_string() {
+        execute_interpreter("\"test");
+    }
 }
