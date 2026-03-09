@@ -11,6 +11,7 @@ A simple interpreter built in Rust. This project is a learning exercise to explo
 *   **Data Types:**
     *   Integers (`i64`)
     *   Booleans (`true`, `false`)
+    *   Strings (`String`)
 *   **Arithmetic Operations:**
     *   Addition (`+`)
     *   Subtraction (`-`)
@@ -57,7 +58,6 @@ A simple interpreter built in Rust. This project is a learning exercise to explo
 This interpreter is still under development. Here are some features planned for the future:
 
 *   **More Data Types:**
-    *   Strings
     *   Floats
     *   Arrays/Lists
 *   **Control Flow:**
