@@ -246,6 +246,20 @@ impl<'a> Parser<'a> {
                 Expression::Variable(name.clone())
             }
             Some(Token::BlockOpen) => self.parse_block(),
+            Some(Token::Quote) => {
+                self.pos += 1;
+
+                match (
+                    self.tokens[self.pos].clone(),
+                    self.tokens[self.pos + 1].clone(),
+                ) {
+                    (Token::String(string_value), Token::Quote) => {
+                        self.pos += 2;
+                        Expression::String(string_value)
+                    }
+                    _ => panic!("Unexpected token {:?} at position {}", token, self.pos),
+                }
+            }
             _ => panic!("Unexpected token {:?} at position {}", token, self.pos),
         }
     }
@@ -435,5 +449,19 @@ mod tests {
             Token::True,
             Token::ParenthesesClosed,
         ]);
+    }
+
+    #[test]
+    fn string() {
+        assert_eq!(
+            parse(&vec![
+                Token::Quote,
+                Token::String("test".to_string()),
+                Token::Quote,
+            ]),
+            Program {
+                expressions: vec![Expression::String("test".to_string())]
+            }
+        )
     }
 }

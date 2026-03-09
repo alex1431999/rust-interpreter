@@ -10,7 +10,7 @@ pub struct Environment {
 impl Environment {
     pub fn get(&self, name: &str) -> Option<Value> {
         if let Some(value) = self.values.get(name) {
-            Some(*value)
+            Some(value.clone())
         } else if let Some(parent) = &self.parent {
             parent.get(name)
         } else {

@@ -5,10 +5,11 @@ use crate::parser::Program;
 use crate::{parser, tokenizer};
 use std::collections::HashMap;
 
-#[derive(Clone, Debug, PartialEq, Copy)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Value {
     Number(i64),
     Boolean(bool),
+    String(String),
 }
 
 pub fn execute_interpreter(input: &str) -> Value {
@@ -37,6 +38,7 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value
     match expression {
         Expression::Number(n) => Value::Number(*n),
         Expression::Boolean(boolean) => Value::Boolean(*boolean),
+        Expression::String(string) => Value::String(string.clone()),
         Expression::Binary {
             left,
             operation,
@@ -370,5 +372,17 @@ mod tests {
     #[should_panic]
     fn comparators_invalid() {
         execute_interpreter("5 > true");
+    }
+
+    #[test]
+    fn strings() {
+        assert_eq!(
+            execute_interpreter("\"hello\""),
+            Value::String("hello".to_string())
+        );
+        assert_eq!(
+            execute_interpreter("remember x = \"hello\"; x;"),
+            Value::String("hello".to_string())
+        )
     }
 }

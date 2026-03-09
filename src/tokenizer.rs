@@ -24,6 +24,10 @@ impl<'a> Tokenizer<'a> {
                 continue;
             }
 
+            if self.process_string() {
+                continue;
+            }
+
             if self.process_number() {
                 continue;
             }
@@ -59,6 +63,33 @@ impl<'a> Tokenizer<'a> {
         }
 
         false
+    }
+
+    fn process_string(&mut self) -> bool {
+        let mut character = self.get_current_character();
+
+        if character == '"' {
+            self.tokens.push(Token::Quote);
+            self.advance(1);
+
+            let mut string_value = String::new();
+
+            character = self.get_current_character();
+            while character != '"' {
+                string_value.push(character);
+                self.advance(1);
+                character = self.get_current_character();
+            }
+
+            self.advance(1);
+
+            self.tokens.push(Token::String(string_value));
+            self.tokens.push(Token::Quote);
+
+            true
+        } else {
+            false
+        }
     }
 
     fn process_number(&mut self) -> bool {
@@ -138,6 +169,7 @@ impl<'a> Tokenizer<'a> {
             '}' => self.tokens.push(Token::BlockClosed),
             '<' => self.tokens.push(Token::Comparator(Comparator::LessThan)),
             '>' => self.tokens.push(Token::Comparator(Comparator::GreaterThan)),
+            '"' => self.tokens.push(Token::Quote),
             _ => return false,
         }
 

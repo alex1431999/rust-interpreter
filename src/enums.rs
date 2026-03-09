@@ -1,6 +1,7 @@
 #[derive(Debug, PartialEq)]
 pub enum Expression {
     Number(i64),
+    String(String),
     Variable(String),
     Boolean(bool),
     Block {
@@ -66,4 +67,6 @@ pub enum Token {
     If,
     Else,
     Comparator(Comparator),
+    Quote,
+    String(String),
 }
