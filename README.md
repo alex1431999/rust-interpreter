@@ -72,3 +72,9 @@ This interpreter is still under development. Here are some features planned for 
     *   More descriptive error messages with line and column numbers.
 *   **File Execution:**
     *   Ability to execute scripts from files.
+
+
+## Usage of AI
+This project has been purely hand-written and no AI was used to generate any of the code.
+It's a learning project to teach myself about interpreters/compilers so any AI usage for code
+generation would be counterproductive.
