@@ -19,25 +19,25 @@ pub fn execute_interpreter(input: &str) -> Value {
 
     let ast = parser::parse(&tokens);
 
-    let mut env = Rc::new(RefCell::new(Environment {
+    let env = Rc::new(RefCell::new(Environment {
         values: HashMap::new(),
         parent: None,
     }));
 
-    interpret(&ast, &mut env)
+    interpret(&ast, env)
 }
 
-fn interpret(program: &Program, env: &mut Rc<RefCell<Environment>>) -> Value {
+fn interpret(program: &Program, env: Rc<RefCell<Environment>>) -> Value {
     let mut result: Value = Value::Number(0);
 
     for expression in &program.expressions {
-        result = interpret_expression(&expression, env)
+        result = interpret_expression(&expression, env.clone())
     }
 
     result
 }
 
-fn interpret_expression(expression: &Expression, env: &mut Rc<RefCell<Environment>>) -> Value {
+fn interpret_expression(expression: &Expression, env: Rc<RefCell<Environment>>) -> Value {
     match expression {
         Expression::Number(n) => Value::Number(*n),
         Expression::Boolean(boolean) => Value::Boolean(*boolean),
@@ -47,8 +47,8 @@ fn interpret_expression(expression: &Expression, env: &mut Rc<RefCell<Environmen
             operation,
             right,
         } => {
-            let left_evaluated = interpret_expression(left, env);
-            let right_evaluated = interpret_expression(right, env);
+            let left_evaluated = interpret_expression(left, env.clone());
+            let right_evaluated = interpret_expression(right, env.clone());
 
             if let Value::Number(left_evaluated_number) = left_evaluated {
                 if let Value::Number(right_evaluated_number) = right_evaluated {
@@ -90,7 +90,7 @@ fn interpret_expression(expression: &Expression, env: &mut Rc<RefCell<Environmen
             }
         }
         Expression::Assign { name, value } => {
-            let value_evaluated = interpret_expression(value, env);
+            let value_evaluated = interpret_expression(value, env.clone());
             env.borrow_mut().set(name.clone(), value_evaluated.clone());
             value_evaluated
         }
@@ -109,13 +109,13 @@ fn interpret_expression(expression: &Expression, env: &mut Rc<RefCell<Environmen
         }
         Expression::Block { expressions } => {
             let mut result: Value = Value::Number(0);
-            let mut child_env = Rc::new(RefCell::new(Environment {
+            let child_env = Rc::new(RefCell::new(Environment {
                 values: HashMap::new(),
                 parent: Some(env.clone()),
             }));
 
             for expression in expressions {
-                result = interpret_expression(expression, &mut child_env)
+                result = interpret_expression(expression, child_env.clone())
             }
 
             result
@@ -125,13 +125,13 @@ fn interpret_expression(expression: &Expression, env: &mut Rc<RefCell<Environmen
             success_expression,
             failure_expression,
         } => {
-            let condition_evaluated = interpret_expression(condition, env);
+            let condition_evaluated = interpret_expression(condition, env.clone());
 
             if let Value::Boolean(condition_evaluated_resolved) = condition_evaluated {
                 if condition_evaluated_resolved {
-                    interpret_expression(success_expression, env)
+                    interpret_expression(success_expression, env.clone())
                 } else if let Some(failure_expression_resolved) = failure_expression {
-                    interpret_expression(failure_expression_resolved, env)
+                    interpret_expression(failure_expression_resolved, env.clone())
                 } else {
                     Value::Number(0)
                 }
@@ -144,8 +144,8 @@ fn interpret_expression(expression: &Expression, env: &mut Rc<RefCell<Environmen
             comparator,
             right,
         } => {
-            let left_evaluated = interpret_expression(left, env);
-            let right_evaluated = interpret_expression(right, env);
+            let left_evaluated = interpret_expression(left, env.clone());
+            let right_evaluated = interpret_expression(right, env.clone());
 
             match comparator {
                 Comparator::Equality => Value::Boolean(left_evaluated == right_evaluated),
@@ -173,7 +173,7 @@ fn interpret_expression(expression: &Expression, env: &mut Rc<RefCell<Environmen
             condition,
             expression,
         } => {
-            let mut condition_evaluated = interpret_expression(condition, env);
+            let mut condition_evaluated = interpret_expression(condition, env.clone());
             let mut continue_loop = match condition_evaluated {
                 Value::Number(number) => number > 0,
                 Value::Boolean(bool) => bool,
@@ -182,9 +182,9 @@ fn interpret_expression(expression: &Expression, env: &mut Rc<RefCell<Environmen
             let mut expression_evaluated = Value::Number(0);
 
             while continue_loop {
-                expression_evaluated = interpret_expression(expression, env);
+                expression_evaluated = interpret_expression(expression, env.clone());
 
-                condition_evaluated = interpret_expression(condition, env);
+                condition_evaluated = interpret_expression(condition, env.clone());
                 continue_loop = match condition_evaluated {
                     Value::Number(number) => number > 0,
                     Value::Boolean(bool) => bool,
