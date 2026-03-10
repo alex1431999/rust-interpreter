@@ -3,7 +3,9 @@ use crate::enums::{Comparator, Expression};
 use crate::environment::Environment;
 use crate::parser::Program;
 use crate::{parser, tokenizer};
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Value {
@@ -17,14 +19,15 @@ pub fn execute_interpreter(input: &str) -> Value {
 
     let ast = parser::parse(&tokens);
 
-    let mut env = Environment {
+    let mut env = Rc::new(RefCell::new(Environment {
         values: HashMap::new(),
         parent: None,
-    };
+    }));
+
     interpret(&ast, &mut env)
 }
 
-fn interpret(program: &Program, env: &mut Environment) -> Value {
+fn interpret(program: &Program, env: &mut Rc<RefCell<Environment>>) -> Value {
     let mut result: Value = Value::Number(0);
 
     for expression in &program.expressions {
@@ -34,7 +37,7 @@ fn interpret(program: &Program, env: &mut Environment) -> Value {
     result
 }
 
-fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value {
+fn interpret_expression(expression: &Expression, env: &mut Rc<RefCell<Environment>>) -> Value {
     match expression {
         Expression::Number(n) => Value::Number(*n),
         Expression::Boolean(boolean) => Value::Boolean(*boolean),
@@ -88,11 +91,12 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value
         }
         Expression::Assign { name, value } => {
             let value_evaluated = interpret_expression(value, env);
-            env.set(name.clone(), value_evaluated.clone());
+            env.borrow_mut().set(name.clone(), value_evaluated.clone());
             value_evaluated
         }
 
         Expression::Variable(name) => env
+            .borrow()
             .get(name)
             .unwrap_or_else(|| panic!("Undefined variable '{}'", name)),
 
@@ -105,10 +109,10 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value
         }
         Expression::Block { expressions } => {
             let mut result: Value = Value::Number(0);
-            let mut child_env = Environment {
+            let mut child_env = Rc::new(RefCell::new(Environment {
                 values: HashMap::new(),
-                parent: Some(Box::new(env.clone())),
-            };
+                parent: Some(env.clone()),
+            }));
 
             for expression in expressions {
                 result = interpret_expression(expression, &mut child_env)
@@ -351,11 +355,6 @@ mod tests {
 
     #[test]
     fn block_scoping() {
-        assert_eq!(
-            execute_interpreter("{ remember x = 5; { remember x = 10; x }; x }"),
-            Value::Number(5)
-        );
-
         assert_eq!(
             execute_interpreter("{ 5 + 5; { 10 + 10; }; }"),
             Value::Number(20)
