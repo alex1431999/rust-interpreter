@@ -165,6 +165,31 @@ fn interpret_expression(expression: &Expression, env: &mut Environment) -> Value
                 },
             }
         }
+        Expression::While {
+            condition,
+            expression,
+        } => {
+            let mut condition_evaluated = interpret_expression(condition, env);
+            let mut continue_loop = match condition_evaluated {
+                Value::Number(number) => number > 0,
+                Value::Boolean(bool) => bool,
+                Value::String(string) => string != "",
+            };
+            let mut expression_evaluated = Value::Number(0);
+
+            while continue_loop {
+                expression_evaluated = interpret_expression(expression, env);
+
+                condition_evaluated = interpret_expression(condition, env);
+                continue_loop = match condition_evaluated {
+                    Value::Number(number) => number > 0,
+                    Value::Boolean(bool) => bool,
+                    Value::String(string) => string != "",
+                };
+            }
+
+            expression_evaluated
+        }
     }
 }
 
@@ -289,6 +314,14 @@ mod tests {
     }
 
     #[test]
+    fn re_assignment() {
+        assert_eq!(
+            execute_interpreter("remember x = 5; x = 10; x"),
+            Value::Number(10)
+        );
+    }
+
+    #[test]
     #[should_panic]
     fn undefined_variable() {
         execute_interpreter("x + 5");
@@ -390,5 +423,13 @@ mod tests {
     #[should_panic]
     fn invalid_string() {
         execute_interpreter("\"test");
+    }
+
+    #[test]
+    fn while_loop() {
+        assert_eq!(
+            execute_interpreter("remember x = 0; while (x < 5) { x = x + 1 }; x;"),
+            Value::Number(5)
+        )
     }
 }

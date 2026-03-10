@@ -126,6 +126,7 @@ impl<'a> Tokenizer<'a> {
                 "false" => Token::False,
                 "if" => Token::If,
                 "else" => Token::Else,
+                "while" => Token::While,
                 _ => Token::Identifier(identifier),
             };
             self.tokens.push(token);

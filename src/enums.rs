@@ -33,6 +33,10 @@ pub enum Expression {
         comparator: Comparator,
         right: Box<Expression>,
     },
+    While {
+        condition: Box<Expression>,
+        expression: Box<Expression>,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -69,4 +73,5 @@ pub enum Token {
     Comparator(Comparator),
     Quote,
     String(String),
+    While,
 }

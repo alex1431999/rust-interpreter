@@ -47,6 +47,7 @@ impl<'a> Parser<'a> {
             Some(Token::Remember) => self.parse_declaration(),
             Some(Token::Yell) => self.parse_yell(),
             Some(Token::If) => self.parse_if(),
+            Some(Token::While) => self.parse_while(),
             _ => self.parse_assignment(),
         }
     }
@@ -109,6 +110,21 @@ impl<'a> Parser<'a> {
                 success_expression: Box::new(success_expression),
                 failure_expression: None,
             }
+        }
+    }
+
+    fn parse_while(&mut self) -> Expression {
+        self.pos += 1;
+
+        self.consume(&Token::ParenthesesOpen);
+        let condition = self.parse_comparator();
+        self.consume(&Token::ParenthesesClosed);
+
+        let expression = self.parse_block();
+
+        Expression::While {
+            condition: Box::new(condition),
+            expression: Box::new(expression),
         }
     }
 
