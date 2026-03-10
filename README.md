@@ -60,6 +60,7 @@ This interpreter is still under development. Here are some features planned for 
 *   **More Data Types:**
     *   Floats
     *   Arrays/Lists
+    *   Null
 *   **Control Flow:**
     *   `while` and `for` loops
     *   `break` and `continue` statements
