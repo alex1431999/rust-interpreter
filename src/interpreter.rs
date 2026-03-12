@@ -35,6 +35,7 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
         Expression::Number(n) => Value::Number(*n),
         Expression::Boolean(boolean) => Value::Boolean(*boolean),
         Expression::String(string) => Value::String(string.clone()),
+        Expression::Null => Value::Null,
         Expression::Binary {
             left,
             operation,
@@ -171,8 +172,9 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
                 Value::Number(number) => number > 0,
                 Value::Boolean(bool) => bool,
                 Value::String(string) => string != "",
+                Value::Null => false,
             };
-            let mut expression_evaluated = Value::Number(0);
+            let mut expression_evaluated = Value::Null;
 
             while continue_loop {
                 expression_evaluated = interpret_expression(expression, env);
@@ -182,6 +184,7 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
                     Value::Number(number) => number > 0,
                     Value::Boolean(bool) => bool,
                     Value::String(string) => string != "",
+                    Value::Null => false,
                 };
             }
 
@@ -423,5 +426,10 @@ mod tests {
             execute_interpreter("remember x = 0; while (x < 5) { x = x + 1 }; x;"),
             Value::Number(5)
         )
+    }
+
+    #[test]
+    fn null() {
+        assert_eq!(execute_interpreter("null"), Value::Null)
     }
 }

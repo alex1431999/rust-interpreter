@@ -4,6 +4,7 @@ pub enum Expression {
     String(String),
     Variable(String),
     Boolean(bool),
+    Null,
     Block {
         expressions: Vec<Expression>,
     },
@@ -74,6 +75,7 @@ pub enum Token {
     Quote,
     String(String),
     While,
+    Null,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -81,4 +83,5 @@ pub enum Value {
     Number(i64),
     Boolean(bool),
     String(String),
+    Null,
 }

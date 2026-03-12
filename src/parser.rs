@@ -269,6 +269,10 @@ impl<'a> Parser<'a> {
                 self.advance(1);
                 Expression::Boolean(false)
             }
+            Some(Token::Null) => {
+                self.advance(1);
+                Expression::Null
+            }
             Some(Token::ParenthesesOpen) => {
                 self.advance(1);
                 let expression = self.parse_expression();
