@@ -1,5 +1,6 @@
 use std::env;
 
+mod cursor;
 mod enums;
 mod environment;
 mod interpreter;

@@ -1,3 +1,4 @@
+use crate::cursor::Cursor;
 use crate::enums::Token;
 use crate::enums::{Expression, Operation};
 
@@ -8,14 +9,31 @@ pub struct Program {
 
 struct Parser<'a> {
     tokens: &'a [Token],
-    pos: usize,
+    position: usize,
+}
+
+impl Cursor<Token> for Parser<'_> {
+    fn list(&self) -> &[Token] {
+        self.tokens
+    }
+
+    fn position(&self) -> usize {
+        self.position
+    }
+
+    fn position_mut(&mut self) -> &mut usize {
+        &mut self.position
+    }
 }
 
 pub fn parse(tokens: &[Token]) -> Program {
-    let mut parser = Parser { tokens, pos: 0 };
+    let mut parser = Parser {
+        tokens,
+        position: 0,
+    };
     let ast = parser.parse_program();
 
-    if parser.pos != tokens.len() {
+    if parser.position != tokens.len() {
         panic!("Has not parsed the entire expression")
     }
 
@@ -28,12 +46,12 @@ impl<'a> Parser<'a> {
             expressions: vec![],
         };
 
-        while self.pos < self.tokens.len() {
+        while self.position < self.tokens.len() {
             let statement = self.parse_statement();
             program.expressions.push(statement);
 
-            match self.tokens.get(self.pos) {
-                Some(Token::Semicolon) => self.pos += 1,
+            match self.tokens.get(self.position) {
+                Some(Token::Semicolon) => self.advance(1),
                 None => break,
                 _ => panic!("Expected ';' between statements"),
             }
@@ -43,7 +61,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_statement(&mut self) -> Expression {
-        match self.tokens.get(self.pos) {
+        match self.tokens.get(self.position) {
             Some(Token::Remember) => self.parse_declaration(),
             Some(Token::Yell) => self.parse_yell(),
             Some(Token::If) => self.parse_if(),
@@ -53,11 +71,11 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_declaration(&mut self) -> Expression {
-        self.pos += 1; // Consume remember
+        self.consume(&Token::Remember); // Consume remember
 
-        let name = match self.tokens.get(self.pos) {
+        let name = match self.tokens.get(self.position) {
             Some(Token::Identifier(name)) => {
-                self.pos += 1;
+                self.advance(1);
                 name.clone()
             }
             _ => panic!("Expected identifier after remember"),
@@ -74,8 +92,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_yell(&mut self) -> Expression {
-        self.pos += 1;
-
+        self.consume(&Token::Yell);
         self.consume(&Token::ParenthesesOpen);
         let expression = self.parse_expression();
         self.consume(&Token::ParenthesesClosed);
@@ -86,7 +103,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_if(&mut self) -> Expression {
-        self.pos += 1;
+        self.consume(&Token::If);
 
         self.consume(&Token::ParenthesesOpen);
         let condition = self.parse_comparator();
@@ -94,7 +111,7 @@ impl<'a> Parser<'a> {
 
         let success_expression = self.parse_block();
 
-        if self.tokens.get(self.pos) == Some(&Token::Else) {
+        if self.tokens.get(self.position) == Some(&Token::Else) {
             self.consume(&Token::Else);
 
             let failure_expression = self.parse_block();
@@ -114,8 +131,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_while(&mut self) -> Expression {
-        self.pos += 1;
-
+        self.consume(&Token::While);
         self.consume(&Token::ParenthesesOpen);
         let condition = self.parse_comparator();
         self.consume(&Token::ParenthesesClosed);
@@ -136,8 +152,8 @@ impl<'a> Parser<'a> {
         let expression = self.parse_comparator();
 
         if let Expression::Variable(ref name) = expression {
-            if let Some(Token::Equals) = self.tokens.get(self.pos) {
-                self.pos += 1;
+            if let Some(Token::Equals) = self.tokens.get(self.position) {
+                self.advance(1);
                 let value = self.parse_assignment();
                 return Expression::Assign {
                     name: name.clone(),
@@ -152,8 +168,8 @@ impl<'a> Parser<'a> {
     fn parse_comparator(&mut self) -> Expression {
         let left = self.parse_expression();
 
-        if let Some(Token::Comparator(comparator)) = self.tokens.get(self.pos) {
-            self.pos += 1;
+        if let Some(Token::Comparator(comparator)) = self.tokens.get(self.position) {
+            self.advance(1);
             let right = self.parse_expression();
 
             Expression::Comparison {
@@ -171,10 +187,10 @@ impl<'a> Parser<'a> {
         let mut left = self.parse_term();
 
         // Iterate over tokens while you still have operations left
-        while let Some(Token::Operation(operation)) = self.tokens.get(self.pos) {
+        while let Some(Token::Operation(operation)) = self.tokens.get(self.position) {
             match operation {
                 Operation::Add | Operation::Subtract => {
-                    self.pos += 1;
+                    self.advance(1);
 
                     // We instantly resolve right
                     let right = self.parse_term();
@@ -197,10 +213,10 @@ impl<'a> Parser<'a> {
         let mut left = self.parse_unary();
 
         // Iterate over tokens while you still have operations left
-        while let Some(Token::Operation(operation)) = self.tokens.get(self.pos) {
+        while let Some(Token::Operation(operation)) = self.tokens.get(self.position) {
             match operation {
                 Operation::Multiply | Operation::Divide => {
-                    self.pos += 1;
+                    self.advance(1);
 
                     // We instantly resolve right
                     let right = self.parse_unary();
@@ -219,64 +235,67 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_unary(&mut self) -> Expression {
-        let Some(Token::Operation(operation)) = self.tokens.get(self.pos) else {
+        let Some(Token::Operation(operation)) = self.tokens.get(self.position) else {
             return self.parse_factor();
         };
 
         match operation {
             Operation::Add | Operation::Subtract => {
-                self.pos += 1;
+                self.advance(1);
                 Expression::Unary {
                     operation: *operation,
                     expression: Box::new(self.parse_unary()),
                 }
             }
-            _ => panic!("Invalid token ${:?} at position {}", operation, self.pos),
+            _ => panic!(
+                "Invalid token ${:?} at position {}",
+                operation, self.position
+            ),
         }
     }
 
     fn parse_factor(&mut self) -> Expression {
-        let token = self.tokens.get(self.pos);
+        let token = self.tokens.get(self.position);
         match token {
             Some(Token::Number(n)) => {
-                self.pos += 1;
+                self.advance(1);
                 Expression::Number(*n)
             }
             Some(Token::True) => {
-                self.pos += 1;
+                self.advance(1);
                 Expression::Boolean(true)
             }
             Some(Token::False) => {
-                self.pos += 1;
+                self.advance(1);
                 Expression::Boolean(false)
             }
             Some(Token::ParenthesesOpen) => {
-                self.pos += 1;
+                self.advance(1);
                 let expression = self.parse_expression();
                 self.consume(&Token::ParenthesesClosed);
 
                 expression
             }
             Some(Token::Identifier(name)) => {
-                self.pos += 1;
+                self.advance(1);
                 Expression::Variable(name.clone())
             }
             Some(Token::BlockOpen) => self.parse_block(),
             Some(Token::Quote) => {
-                self.pos += 1;
+                self.advance(1);
 
                 match (
-                    self.tokens[self.pos].clone(),
-                    self.tokens[self.pos + 1].clone(),
+                    self.tokens[self.position].clone(),
+                    self.tokens[self.position + 1].clone(),
                 ) {
                     (Token::String(string_value), Token::Quote) => {
-                        self.pos += 2;
+                        self.advance(2);
                         Expression::String(string_value)
                     }
-                    _ => panic!("Unexpected token {:?} at position {}", token, self.pos),
+                    _ => panic!("Unexpected token {:?} at position {}", token, self.position),
                 }
             }
-            _ => panic!("Unexpected token {:?} at position {}", token, self.pos),
+            _ => panic!("Unexpected token {:?} at position {}", token, self.position),
         }
     }
 
@@ -285,12 +304,12 @@ impl<'a> Parser<'a> {
 
         let mut expressions: Vec<Expression> = vec![];
 
-        while self.tokens.get(self.pos) != Some(&Token::BlockClosed) {
+        while self.tokens.get(self.position) != Some(&Token::BlockClosed) {
             let expression = self.parse_statement();
             expressions.push(expression);
 
-            match self.tokens.get(self.pos) {
-                Some(Token::Semicolon) => self.pos += 1,
+            match self.tokens.get(self.position) {
+                Some(Token::Semicolon) => self.advance(1),
                 Some(Token::BlockClosed) => break,
                 _ => panic!("Expected ';' or '}}' in block"),
             }
@@ -299,15 +318,6 @@ impl<'a> Parser<'a> {
         self.consume(&Token::BlockClosed);
 
         Expression::Block { expressions }
-    }
-
-    fn consume(&mut self, token: &Token) {
-        let token_resolved = self.tokens.get(self.pos);
-        if token_resolved != Some(token) {
-            panic!("Expected {:?} but got ${:?} instead", token, token_resolved)
-        }
-
-        self.pos += 1;
     }
 }
 
