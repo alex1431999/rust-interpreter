@@ -1,9 +1,10 @@
+use crate::cursor::Cursor;
 use crate::enums::{Comparator, Operation, Token};
 
 struct Tokenizer<'a> {
     characters: &'a [char],
     tokens: Vec<Token>,
-    pos: usize,
+    position: usize,
 }
 
 pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
@@ -11,10 +12,24 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
     let tokenizer = Tokenizer {
         characters: &characters,
         tokens: vec![],
-        pos: 0,
+        position: 0,
     };
 
     tokenizer.tokenize()
+}
+
+impl Cursor<char> for Tokenizer<'_> {
+    fn list(&self) -> &[char] {
+        self.characters
+    }
+
+    fn position(&self) -> usize {
+        self.position
+    }
+
+    fn position_mut(&mut self) -> &mut usize {
+        &mut self.position
+    }
 }
 
 impl<'a> Tokenizer<'a> {
@@ -46,8 +61,8 @@ impl<'a> Tokenizer<'a> {
 
             panic!(
                 "Unexpected character '{}' at {}",
-                self.get_current_character(),
-                self.pos
+                self.get_current(),
+                self.position
             )
         }
 
@@ -55,7 +70,7 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn process_white_space(&mut self) -> bool {
-        let character = self.get_current_character();
+        let character = self.get_current();
 
         if character.is_whitespace() {
             self.advance(1);
@@ -66,7 +81,7 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn process_string(&mut self) -> bool {
-        let mut character = self.get_current_character();
+        let mut character = self.get_current();
 
         if character == '"' {
             self.tokens.push(Token::Quote);
@@ -74,11 +89,11 @@ impl<'a> Tokenizer<'a> {
 
             let mut string_value = String::new();
 
-            character = self.get_current_character();
+            character = self.get_current();
             while character != '"' {
                 string_value.push(character);
                 self.advance(1);
-                character = self.get_current_character();
+                character = self.get_current();
             }
 
             self.advance(1);
@@ -93,12 +108,12 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn process_number(&mut self) -> bool {
-        let character = self.get_current_character();
+        let character = self.get_current();
 
         if character.is_ascii_digit() {
             let mut number = 0;
-            while self.has_more() && self.get_current_character().is_ascii_digit() {
-                number = number * 10 + self.get_current_character().to_digit(10).unwrap() as i64;
+            while self.has_more() && self.get_current().is_ascii_digit() {
+                number = number * 10 + self.get_current().to_digit(10).unwrap() as i64;
                 self.advance(1)
             }
             self.tokens.push(Token::Number(number));
@@ -109,13 +124,13 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn process_identifier(&mut self) -> bool {
-        let character = self.get_current_character();
+        let character = self.get_current();
         if is_identifier_character(character, true) {
             let mut identifier = String::new();
             while self.has_more()
-                && is_identifier_character(self.get_current_character(), identifier.is_empty())
+                && is_identifier_character(self.get_current(), identifier.is_empty())
             {
-                identifier.push(self.get_current_character());
+                identifier.push(self.get_current());
                 self.advance(1)
             }
 
@@ -138,12 +153,12 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn process_equality(&mut self) -> bool {
-        if self.characters_left() < 2 {
+        if self.items_left() < 2 {
             return false;
         }
 
-        let character = self.get_current_character();
-        let next_character = self.get_next_character();
+        let character = self.get_current();
+        let next_character = self.get_next();
 
         if character == '=' && next_character == '=' {
             self.tokens.push(Token::Comparator(Comparator::Equality));
@@ -155,7 +170,7 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn process_basic_tokens(&mut self) -> bool {
-        let character = self.get_current_character();
+        let character = self.get_current();
 
         match character {
             '+' => self.tokens.push(Token::Operation(Operation::Add)),
@@ -177,26 +192,6 @@ impl<'a> Tokenizer<'a> {
         self.advance(1);
 
         true
-    }
-
-    fn get_current_character(&self) -> char {
-        self.characters[self.pos]
-    }
-
-    fn get_next_character(&self) -> char {
-        self.characters[self.pos + 1]
-    }
-
-    fn has_more(&self) -> bool {
-        self.pos < self.characters.len()
-    }
-
-    fn characters_left(&self) -> usize {
-        self.characters.len() - self.pos
-    }
-
-    fn advance(&mut self, amount: usize) {
-        self.pos += amount
     }
 }
 
