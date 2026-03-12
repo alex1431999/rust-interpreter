@@ -13,7 +13,7 @@ struct Parser<'a> {
 }
 
 impl Cursor<Token> for Parser<'_> {
-    fn list(&self) -> &[Token] {
+    fn items(&self) -> &[Token] {
         self.tokens
     }
 

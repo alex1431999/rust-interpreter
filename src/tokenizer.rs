@@ -19,7 +19,7 @@ pub fn tokenize(code_to_execute: &str) -> Vec<Token> {
 }
 
 impl Cursor<char> for Tokenizer<'_> {
-    fn list(&self) -> &[char] {
+    fn items(&self) -> &[char] {
         self.characters
     }
 

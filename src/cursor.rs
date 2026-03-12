@@ -1,11 +1,11 @@
 pub trait Cursor<T: std::fmt::Debug + PartialEq + Clone> {
-    fn list(&self) -> &[T];
+    fn items(&self) -> &[T];
     fn position(&self) -> usize;
     fn position_mut(&mut self) -> &mut usize;
 
     fn consume(&mut self, item: &T) {
-        let list = self.list();
-        let item_resolved = list.get(self.position());
+        let items = self.items();
+        let item_resolved = items.get(self.position());
 
         if item_resolved != Some(item) {
             panic!("Expected {:?} but got {:?} instead", item, item_resolved);
@@ -19,18 +19,18 @@ pub trait Cursor<T: std::fmt::Debug + PartialEq + Clone> {
     }
 
     fn has_more(&self) -> bool {
-        self.position() < self.list().len()
+        self.position() < self.items().len()
     }
 
     fn get_current(&self) -> T {
-        self.list()[self.position()].clone()
+        self.items()[self.position()].clone()
     }
 
     fn get_next(&self) -> T {
-        self.list()[self.position() + 1].clone()
+        self.items()[self.position() + 1].clone()
     }
 
     fn items_left(&self) -> usize {
-        self.list().len() - self.position()
+        self.items().len() - self.position()
     }
 }
