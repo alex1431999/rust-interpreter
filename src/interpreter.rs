@@ -98,11 +98,10 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
             let value_evaluated = interpret_expression(expression, env);
             println!("{:?}", value_evaluated);
 
-            // 0 just means the program has run successfully
-            Value::Number(0)
+            Value::Null
         }
         Expression::Block { expressions } => {
-            let mut result: Value = Value::Number(0);
+            let mut result: Value = Value::Null;
             let child_env = Rc::new(RefCell::new(Environment {
                 values: HashMap::new(),
                 parent: Some(env.clone()),
@@ -127,7 +126,7 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
                 } else if let Some(failure_expression_resolved) = failure_expression {
                     interpret_expression(failure_expression_resolved, env)
                 } else {
-                    Value::Number(0)
+                    Value::Null
                 }
             } else {
                 panic!("If statements need to evaluate to a boolean")
@@ -337,7 +336,7 @@ mod tests {
 
     #[test]
     fn yell() {
-        assert_eq!(execute_interpreter("yell(5 + 5)"), Value::Number(0));
+        assert_eq!(execute_interpreter("yell(5 + 5)"), Value::Null);
         assert_eq!(
             execute_interpreter("yell(5 + 5); 10 + 10"),
             Value::Number(20)
@@ -366,7 +365,7 @@ mod tests {
     #[test]
     fn conditions() {
         assert_eq!(execute_interpreter("if (true) { 5 }"), Value::Number(5));
-        assert_eq!(execute_interpreter("if (false) { 5 }"), Value::Number(0));
+        assert_eq!(execute_interpreter("if (false) { 5 }"), Value::Null);
         assert_eq!(
             execute_interpreter("if (false) { 5 } else { 10 }"),
             Value::Number(10)
