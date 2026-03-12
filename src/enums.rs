@@ -75,3 +75,10 @@ pub enum Token {
     String(String),
     While,
 }
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum Value {
+    Number(i64),
+    Boolean(bool),
+    String(String),
+}

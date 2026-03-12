@@ -1,18 +1,11 @@
-use crate::enums::Operation;
 use crate::enums::{Comparator, Expression};
+use crate::enums::{Operation, Value};
 use crate::environment::Environment;
 use crate::parser::Program;
 use crate::{parser, tokenizer};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum Value {
-    Number(i64),
-    Boolean(bool),
-    String(String),
-}
 
 pub fn execute_interpreter(input: &str) -> Value {
     let tokens = tokenizer::tokenize(input);
