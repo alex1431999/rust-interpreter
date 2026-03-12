@@ -34,7 +34,7 @@ impl Cursor<char> for Tokenizer<'_> {
 
 impl<'a> Tokenizer<'a> {
     fn tokenize(mut self) -> Vec<Token> {
-        while self.has_more() {
+        while self.has_next() {
             if self.process_white_space() {
                 continue;
             }
@@ -112,7 +112,7 @@ impl<'a> Tokenizer<'a> {
 
         if character.is_ascii_digit() {
             let mut number = 0;
-            while self.has_more() && self.get_current().is_ascii_digit() {
+            while self.has_next() && self.get_current().is_ascii_digit() {
                 number = number * 10 + self.get_current().to_digit(10).unwrap() as i64;
                 self.advance(1)
             }
@@ -127,7 +127,7 @@ impl<'a> Tokenizer<'a> {
         let character = self.get_current();
         if is_identifier_character(character, true) {
             let mut identifier = String::new();
-            while self.has_more()
+            while self.has_next()
                 && is_identifier_character(self.get_current(), identifier.is_empty())
             {
                 identifier.push(self.get_current());

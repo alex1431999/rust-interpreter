@@ -18,7 +18,7 @@ pub trait Cursor<T: std::fmt::Debug + PartialEq + Clone> {
         *self.position_mut() += steps;
     }
 
-    fn has_more(&self) -> bool {
+    fn has_next(&self) -> bool {
         self.position() < self.items().len()
     }
 
