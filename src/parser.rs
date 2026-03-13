@@ -299,6 +299,30 @@ impl<'a> Parser<'a> {
                     _ => panic!("Unexpected token {:?} at position {}", token, self.position),
                 }
             }
+            Some(Token::BracketOpen) => {
+                self.advance(1);
+
+                let mut items = vec![];
+
+                while self.get_current() != Token::BracketClosed {
+                    let item = self.parse_statement();
+                    items.push(item);
+
+                    let current = self.get_current();
+                    match current {
+                        Token::BracketClosed => break,
+                        Token::Comma => self.consume(&Token::Comma),
+                        _ => panic!(
+                            "Unexpected token {:?} at position {}",
+                            current, self.position
+                        ),
+                    }
+                }
+
+                self.consume(&Token::BracketClosed);
+
+                Expression::List(items)
+            }
             _ => panic!("Unexpected token {:?} at position {}", token, self.position),
         }
     }
@@ -308,7 +332,7 @@ impl<'a> Parser<'a> {
 
         let mut expressions: Vec<Expression> = vec![];
 
-        while self.tokens.get(self.position) != Some(&Token::BlockClosed) {
+        while self.get_current() != Token::BlockClosed {
             let expression = self.parse_statement();
             expressions.push(expression);
 

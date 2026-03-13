@@ -187,6 +187,9 @@ impl<'a> Tokenizer<'a> {
             '<' => self.tokens.push(Token::Comparator(Comparator::LessThan)),
             '>' => self.tokens.push(Token::Comparator(Comparator::GreaterThan)),
             '"' => self.tokens.push(Token::Quote),
+            '[' => self.tokens.push(Token::BracketOpen),
+            ']' => self.tokens.push(Token::BracketClosed),
+            ',' => self.tokens.push(Token::Comma),
             _ => return false,
         }
 

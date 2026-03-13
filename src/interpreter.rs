@@ -35,6 +35,15 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
         Expression::Number(n) => Value::Number(*n),
         Expression::Boolean(boolean) => Value::Boolean(*boolean),
         Expression::String(string) => Value::String(string.clone()),
+        Expression::List(items) => {
+            let mut list: Vec<Value> = vec![];
+            for item in items {
+                let item_evaluated = interpret_expression(item, env);
+                list.push(item_evaluated);
+            }
+
+            Value::List(list)
+        }
         Expression::Null => Value::Null,
         Expression::Binary {
             left,
@@ -172,6 +181,7 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
                 Value::Boolean(bool) => bool,
                 Value::String(string) => string != "",
                 Value::Null => false,
+                Value::List(list) => list.len() > 0,
             };
             let mut expression_evaluated = Value::Null;
 
@@ -184,6 +194,7 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
                     Value::Boolean(bool) => bool,
                     Value::String(string) => string != "",
                     Value::Null => false,
+                    Value::List(list) => list.len() > 0,
                 };
             }
 
@@ -430,5 +441,29 @@ mod tests {
     #[test]
     fn null() {
         assert_eq!(execute_interpreter("null"), Value::Null)
+    }
+
+    #[test]
+    fn lists() {
+        assert_eq!(
+            execute_interpreter("[1, 2, 3]"),
+            Value::List(vec![Value::Number(1), Value::Number(2), Value::Number(3)])
+        );
+        assert_eq!(
+            execute_interpreter("remember x = [1, 2, 3]; x;"),
+            Value::List(vec![Value::Number(1), Value::Number(2), Value::Number(3)])
+        )
+    }
+
+    #[test]
+    #[should_panic]
+    fn invalid_list_missing_closing_bracket() {
+        execute_interpreter("[1,2");
+    }
+
+    #[test]
+    #[should_panic]
+    fn invalid_list_missing_comma() {
+        execute_interpreter("[1 2]");
     }
 }
