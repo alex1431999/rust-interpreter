@@ -70,11 +70,6 @@ This interpreter is still under development. Here are some features planned for 
     *   Closures
 *   **Standard Library:**
     *   A small set of built-in functions.
-*   **Improved Error Handling:**
-    *   More descriptive error messages with line and column numbers.
-*   **File Execution:**
-    *   Ability to execute scripts from files.
-
 
 ## Usage of AI
 This project has been purely hand-written and no AI was used to generate any of the code.
