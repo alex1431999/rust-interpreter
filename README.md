@@ -13,6 +13,7 @@ A simple interpreter built in Rust. This project is a learning exercise to explo
     *   Booleans (`true`, `false`)
     *   Strings (`String`)
     *   Null
+    *   Lists
 *   **Arithmetic Operations:**
     *   Addition (`+`)
     *   Subtraction (`-`)
@@ -61,7 +62,6 @@ This interpreter is still under development. Here are some features planned for 
 
 *   **More Data Types:**
     *   Floats
-    *   Arrays/Lists
 *   **Control Flow:**
     *    `for` loops
     *    `break` and `continue` statements
