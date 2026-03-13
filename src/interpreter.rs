@@ -200,6 +200,23 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
 
             expression_evaluated
         }
+        Expression::For {
+            identifier,
+            list,
+            expression,
+        } => {
+            match interpret_expression(list, env) {
+                Value::List(list_evaluated) => {
+                    for item in list_evaluated {
+                        env.borrow_mut().set(identifier.clone(), item);
+                        interpret_expression(expression, env);
+                    }
+                }
+                _ => panic!("for loop needs to iterate over a list"),
+            }
+
+            Value::Null
+        }
     }
 }
 
@@ -465,5 +482,18 @@ mod tests {
     #[should_panic]
     fn invalid_list_missing_comma() {
         execute_interpreter("[1 2]");
+    }
+
+    #[test]
+    fn for_loop() {
+        assert_eq!(
+            execute_interpreter("for (x in [1]) { yell(x); };"),
+            Value::Null
+        );
+
+        assert_eq!(
+            execute_interpreter("remember x = 0; for (y in [5, 6]) { x = y }; y;"),
+            Value::Number(6)
+        )
     }
 }

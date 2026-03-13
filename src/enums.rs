@@ -39,6 +39,11 @@ pub enum Expression {
         condition: Box<Expression>,
         expression: Box<Expression>,
     },
+    For {
+        identifier: String,
+        list: Box<Expression>,
+        expression: Box<Expression>,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -80,6 +85,8 @@ pub enum Token {
     While,
     Null,
     Comma,
+    For,
+    In,
 }
 
 #[derive(Clone, Debug, PartialEq)]

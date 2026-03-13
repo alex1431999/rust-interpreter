@@ -66,6 +66,7 @@ impl<'a> Parser<'a> {
             Some(Token::Yell) => self.parse_yell(),
             Some(Token::If) => self.parse_if(),
             Some(Token::While) => self.parse_while(),
+            Some(Token::For) => self.parse_for(),
             _ => self.parse_assignment(),
         }
     }
@@ -127,6 +128,34 @@ impl<'a> Parser<'a> {
                 success_expression: Box::new(success_expression),
                 failure_expression: None,
             }
+        }
+    }
+
+    fn parse_for(&mut self) -> Expression {
+        self.consume(&Token::For);
+        self.consume(&Token::ParenthesesOpen);
+
+        let name = match self.get_current() {
+            Token::Identifier(identifier) => identifier,
+            _ => panic!(
+                "Invalid token ${:?} at position {}",
+                self.get_current(),
+                self.position
+            ),
+        };
+        self.consume(&Token::Identifier(name.clone()));
+        self.consume(&Token::In);
+
+        let list = self.parse_factor();
+
+        self.consume(&Token::ParenthesesClosed);
+
+        let expression = self.parse_expression();
+
+        Expression::For {
+            identifier: name,
+            list: Box::new(list),
+            expression: Box::new(expression),
         }
     }
 

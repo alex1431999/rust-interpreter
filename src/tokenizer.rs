@@ -143,6 +143,8 @@ impl<'a> Tokenizer<'a> {
                 "else" => Token::Else,
                 "while" => Token::While,
                 "null" => Token::Null,
+                "for" => Token::For,
+                "in" => Token::In,
                 _ => Token::Identifier(identifier),
             };
             self.tokens.push(token);
