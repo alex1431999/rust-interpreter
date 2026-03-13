@@ -27,6 +27,7 @@ A simple interpreter built in Rust. This project is a learning exercise to explo
 *   **Control Flow:**
     *   `if/else` statements
     *    `while` loop
+    *    `for` loops
 *   **Scoping:**
     *   Block-level scope using curly braces `{}`.
 *   **Output:**
@@ -63,7 +64,6 @@ This interpreter is still under development. Here are some features planned for 
 *   **More Data Types:**
     *   Floats
 *   **Control Flow:**
-    *    `for` loops
     *    `break` and `continue` statements
 *   **Functions:**
     *   User-defined functions
