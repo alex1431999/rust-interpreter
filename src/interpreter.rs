@@ -261,7 +261,7 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
                         let parameter_name = &parameter_names[i];
                         let parameter_resolved = interpret_expression(parameter, env);
 
-                        child_env.borrow_mut().set(
+                        child_env.borrow_mut().records.insert(
                             parameter_name.clone(),
                             EnvironmentRecord::Value(parameter_resolved),
                         );
@@ -587,6 +587,18 @@ mod tests {
         assert_eq!(
             execute_interpreter("function add(a, b) { a + b }; add(5, 5)"),
             Value::Number(10)
+        )
+    }
+
+    #[test]
+    fn functions_variable_scope() {
+        assert_eq!(
+            execute_interpreter("remember x = 5; function test(x) { x  + 5 }; test(2)"),
+            Value::Number(7)
+        );
+        assert_eq!(
+            execute_interpreter("remember y = 5; function test(x) { x  + y }; test(2)"),
+            Value::Number(7)
         )
     }
 }
