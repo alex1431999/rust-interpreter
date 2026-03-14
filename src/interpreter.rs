@@ -177,28 +177,14 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
             expression,
         } => {
             let mut condition_evaluated = interpret_expression(condition, env);
-            let mut continue_loop = match condition_evaluated {
-                Value::Number(number) => number > 0,
-                Value::Float(float) => float > 0.0,
-                Value::Boolean(bool) => bool,
-                Value::String(string) => string != "",
-                Value::Null => false,
-                Value::List(list) => list.len() > 0,
-            };
+            let mut continue_loop = is_truthy_value(condition_evaluated);
             let mut expression_evaluated = Value::Null;
 
             while continue_loop {
                 expression_evaluated = interpret_expression(expression, env);
 
                 condition_evaluated = interpret_expression(condition, env);
-                continue_loop = match condition_evaluated {
-                    Value::Number(number) => number > 0,
-                    Value::Float(float) => float > 0.0,
-                    Value::Boolean(bool) => bool,
-                    Value::String(string) => string != "",
-                    Value::Null => false,
-                    Value::List(list) => list.len() > 0,
-                };
+                continue_loop = is_truthy_value(condition_evaluated);
             }
 
             expression_evaluated
@@ -220,6 +206,17 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
 
             Value::Null
         }
+    }
+}
+
+fn is_truthy_value(value: Value) -> bool {
+    match value {
+        Value::Number(number) => number > 0,
+        Value::Float(float) => float > 0.0,
+        Value::Boolean(bool) => bool,
+        Value::String(string) => string != "",
+        Value::Null => false,
+        Value::List(list) => list.len() > 0,
     }
 }
 
