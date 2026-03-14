@@ -3,6 +3,7 @@ use std::env;
 mod cursor;
 mod enums;
 mod environment;
+mod examples;
 mod interpreter;
 mod parser;
 mod tokenizer;
