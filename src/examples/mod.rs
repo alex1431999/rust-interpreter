@@ -17,6 +17,7 @@ mod tests {
 
     #[test]
     fn examples_succeed() {
-        run_file("./src/examples/hello_world.nali".to_string())
+        run_file("./src/examples/hello_world.nali".to_string());
+        run_file("./src/examples/for_loop.nali".to_string())
     }
 }
