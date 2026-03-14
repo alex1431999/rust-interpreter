@@ -1,0 +1,7 @@
+remember x = 0;
+
+while (x < 5) {
+  yell(x);
+
+  x = x + 1;
+}
