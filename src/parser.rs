@@ -188,12 +188,37 @@ impl<'a> Parser<'a> {
 
         self.consume(&Token::Identifier(identifier.clone()));
         self.consume(&Token::ParenthesesOpen);
+
+        let mut parameters: Vec<String> = vec![];
+        while self.get_current() != Token::ParenthesesClosed {
+            match self.get_current() {
+                Token::Identifier(identifier) => parameters.push(identifier),
+                _ => panic!(
+                    "Invalid token ${:?} at position {}",
+                    self.get_current(),
+                    self.position
+                ),
+            }
+            self.advance(1);
+
+            match self.get_current() {
+                Token::ParenthesesClosed => break,
+                Token::Comma => self.consume(&Token::Comma),
+                _ => panic!(
+                    "Unexpected token {:?} at position {}",
+                    self.get_current(),
+                    self.position
+                ),
+            }
+        }
+
         self.consume(&Token::ParenthesesClosed);
 
         let expression = self.parse_block();
 
         Expression::Function {
             identifier,
+            parameters,
             expression: Box::new(expression),
         }
     }
@@ -217,9 +242,26 @@ impl<'a> Parser<'a> {
 
             if let Some(Token::ParenthesesOpen) = self.tokens.get(self.position) {
                 self.advance(1);
+
+                let mut parameters: Vec<Expression> = vec![];
+                while self.get_current() != Token::ParenthesesClosed {
+                    parameters.push(self.parse_expression());
+
+                    match self.get_current() {
+                        Token::ParenthesesClosed => break,
+                        Token::Comma => self.consume(&Token::Comma),
+                        _ => panic!(
+                            "Unexpected token {:?} at position {}",
+                            self.get_current(),
+                            self.position
+                        ),
+                    }
+                }
+
                 self.consume(&Token::ParenthesesClosed);
                 return Expression::FunctionCall {
                     identifier: name.clone(),
+                    parameters,
                 };
             }
         }

@@ -7,7 +7,10 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub enum EnvironmentRecord {
     Value(Value),
-    Expression(Box<Expression>),
+    Function {
+        expression: Box<Expression>,
+        parameters: Vec<String>,
+    },
 }
 
 #[derive(Clone)]

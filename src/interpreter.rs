@@ -217,23 +217,59 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
         }
         Expression::Function {
             identifier,
+            parameters,
             expression,
         } => {
             env.borrow_mut().set(
                 identifier.clone(),
-                EnvironmentRecord::Expression(expression.clone()),
+                EnvironmentRecord::Function {
+                    parameters: parameters.clone(),
+                    expression: expression.clone(),
+                },
             );
 
             Value::Null
         }
-        Expression::FunctionCall { identifier } => {
+        Expression::FunctionCall {
+            identifier,
+            parameters,
+        } => {
             match env
                 .borrow()
                 .get(identifier)
                 .unwrap_or_else(|| panic!("Undefined variable '{}'", identifier))
             {
-                EnvironmentRecord::Expression(expression) => {
-                    interpret_expression(&*expression, env)
+                EnvironmentRecord::Function {
+                    parameters: parameter_names,
+                    expression,
+                } => {
+                    if parameters.len() != parameter_names.len() {
+                        panic!(
+                            "Incorrect amount of parameters supplied for function {}",
+                            identifier
+                        );
+                    }
+
+                    let child_env = Rc::new(RefCell::new(Environment {
+                        records: HashMap::new(),
+                        parent: Some(env.clone()),
+                    }));
+
+                    let mut i = 0;
+                    while i < parameters.len() {
+                        let parameter = &parameters[i];
+                        let parameter_name = &parameter_names[i];
+                        let parameter_resolved = interpret_expression(parameter, env);
+
+                        child_env.borrow_mut().set(
+                            parameter_name.clone(),
+                            EnvironmentRecord::Value(parameter_resolved),
+                        );
+
+                        i += 1;
+                    }
+
+                    interpret_expression(&*expression, &child_env)
                 }
                 _ => panic!("Undefined variable '{}'", identifier),
             }
@@ -539,6 +575,18 @@ mod tests {
         assert_eq!(
             execute_interpreter("function test() { 5 }; test()"),
             Value::Number(5)
+        );
+    }
+
+    #[test]
+    fn functions_with_params() {
+        assert_eq!(
+            execute_interpreter("function test(x) { x + 5 }; test(2)"),
+            Value::Number(7)
+        );
+        assert_eq!(
+            execute_interpreter("function add(a, b) { a + b }; add(5, 5)"),
+            Value::Number(10)
         )
     }
 }

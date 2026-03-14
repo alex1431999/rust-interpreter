@@ -47,10 +47,12 @@ pub enum Expression {
     },
     Function {
         identifier: String,
+        parameters: Vec<String>,
         expression: Box<Expression>,
     },
     FunctionCall {
         identifier: String,
+        parameters: Vec<Expression>,
     },
 }
 

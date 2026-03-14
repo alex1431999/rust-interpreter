@@ -3,3 +3,9 @@ function test() {
 };
 
 test();
+
+function add(a, b) {
+  a + b;
+};
+
+add(5, 5);
