@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
     Number(i64),
     Float(f64),
@@ -45,6 +45,13 @@ pub enum Expression {
         list: Box<Expression>,
         expression: Box<Expression>,
     },
+    Function {
+        identifier: String,
+        expression: Box<Expression>,
+    },
+    FunctionCall {
+        identifier: String,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -89,6 +96,7 @@ pub enum Token {
     Comma,
     For,
     In,
+    Function,
 }
 
 #[derive(Clone, Debug, PartialEq)]

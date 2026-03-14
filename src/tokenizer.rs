@@ -162,6 +162,7 @@ impl<'a> Tokenizer<'a> {
                 "null" => Token::Null,
                 "for" => Token::For,
                 "in" => Token::In,
+                "function" => Token::Function,
                 _ => Token::Identifier(identifier),
             };
             self.tokens.push(token);

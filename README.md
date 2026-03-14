@@ -29,6 +29,8 @@ A simple interpreter built in Rust. This project is a learning exercise to explo
     *   `if/else` statements
     *    `while` loop
     *    `for` loops
+*   **Functions:**
+    *   User-defined functions
 *   **Scoping:**
     *   Block-level scope using curly braces `{}`.
 *   **Output:**
@@ -65,7 +67,6 @@ This interpreter is still under development. Here are some features planned for 
 *   **Control Flow:**
     *    `break` and `continue` statements
 *   **Functions:**
-    *   User-defined functions
     *   Closures
 *   **Standard Library:**
     *   A small set of built-in functions.

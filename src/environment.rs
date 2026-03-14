@@ -1,17 +1,24 @@
+use crate::enums::Expression;
 use crate::enums::Value;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
 #[derive(Clone)]
+pub enum EnvironmentRecord {
+    Value(Value),
+    Expression(Box<Expression>),
+}
+
+#[derive(Clone)]
 pub struct Environment {
-    pub values: HashMap<String, Value>,
+    pub records: HashMap<String, EnvironmentRecord>,
     pub parent: Option<Rc<RefCell<Environment>>>,
 }
 
 impl Environment {
-    pub fn get(&self, name: &str) -> Option<Value> {
-        if let Some(value) = self.values.get(name) {
+    pub fn get(&self, name: &str) -> Option<EnvironmentRecord> {
+        if let Some(value) = self.records.get(name) {
             Some(value.clone())
         } else if let Some(parent) = &self.parent {
             parent.borrow().get(name)
@@ -20,24 +27,24 @@ impl Environment {
         }
     }
 
-    pub fn set(&mut self, name: String, value: Value) {
-        if self.values.contains_key(&name) {
-            self.values.insert(name, value);
+    pub fn set(&mut self, name: String, record: EnvironmentRecord) {
+        if self.records.contains_key(&name) {
+            self.records.insert(name, record);
             return;
         }
 
         if let Some(parent) = &self.parent {
             if parent.borrow().has(&name) {
-                parent.borrow_mut().set(name, value);
+                parent.borrow_mut().set(name, record);
                 return;
             }
         }
 
-        self.values.insert(name, value);
+        self.records.insert(name, record);
     }
 
     pub fn has(&self, name: &str) -> bool {
-        if self.values.contains_key(name) {
+        if self.records.contains_key(name) {
             return true;
         }
 

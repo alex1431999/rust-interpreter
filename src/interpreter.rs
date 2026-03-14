@@ -1,6 +1,6 @@
 use crate::enums::{Comparator, Expression};
 use crate::enums::{Operation, Value};
-use crate::environment::Environment;
+use crate::environment::{Environment, EnvironmentRecord};
 use crate::parser::Program;
 use crate::{parser, tokenizer};
 use std::cell::RefCell;
@@ -13,7 +13,7 @@ pub fn execute_interpreter(input: &str) -> Value {
     let ast = parser::parse(&tokens);
 
     let env = Rc::new(RefCell::new(Environment {
-        values: HashMap::new(),
+        records: HashMap::new(),
         parent: None,
     }));
 
@@ -95,14 +95,23 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
         }
         Expression::Assign { name, value } => {
             let value_evaluated = interpret_expression(value, env);
-            env.borrow_mut().set(name.clone(), value_evaluated.clone());
+            env.borrow_mut().set(
+                name.clone(),
+                EnvironmentRecord::Value(value_evaluated.clone()),
+            );
             value_evaluated
         }
 
-        Expression::Variable(name) => env
-            .borrow()
-            .get(name)
-            .unwrap_or_else(|| panic!("Undefined variable '{}'", name)),
+        Expression::Variable(name) => {
+            match env
+                .borrow()
+                .get(name)
+                .unwrap_or_else(|| panic!("Undefined variable '{}'", name))
+            {
+                EnvironmentRecord::Value(value) => value,
+                _ => panic!("Undefined variable '{}'", name),
+            }
+        }
 
         Expression::Yell { expression } => {
             let value_evaluated = interpret_expression(expression, env);
@@ -113,7 +122,7 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
         Expression::Block { expressions } => {
             let mut result: Value = Value::Null;
             let child_env = Rc::new(RefCell::new(Environment {
-                values: HashMap::new(),
+                records: HashMap::new(),
                 parent: Some(env.clone()),
             }));
 
@@ -196,7 +205,8 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
             match interpret_expression(list, env) {
                 Value::List(list_evaluated) => {
                     for item in list_evaluated {
-                        env.borrow_mut().set(identifier.clone(), item);
+                        env.borrow_mut()
+                            .set(identifier.clone(), EnvironmentRecord::Value(item));
                         interpret_expression(expression, env);
                     }
                 }
@@ -204,6 +214,29 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
             }
 
             Value::Null
+        }
+        Expression::Function {
+            identifier,
+            expression,
+        } => {
+            env.borrow_mut().set(
+                identifier.clone(),
+                EnvironmentRecord::Expression(expression.clone()),
+            );
+
+            Value::Null
+        }
+        Expression::FunctionCall { identifier } => {
+            match env
+                .borrow()
+                .get(identifier)
+                .unwrap_or_else(|| panic!("Undefined variable '{}'", identifier))
+            {
+                EnvironmentRecord::Expression(expression) => {
+                    interpret_expression(&*expression, env)
+                }
+                _ => panic!("Undefined variable '{}'", identifier),
+            }
         }
     }
 }
@@ -499,5 +532,13 @@ mod tests {
     #[test]
     fn float() {
         assert_eq!(execute_interpreter("5.5"), Value::Float(5.5))
+    }
+
+    #[test]
+    fn functions() {
+        assert_eq!(
+            execute_interpreter("function test() { 5 }; test()"),
+            Value::Number(5)
+        )
     }
 }

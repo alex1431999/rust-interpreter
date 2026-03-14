@@ -1,0 +1,5 @@
+function test() {
+  yell("Hello world!");
+};
+
+test();

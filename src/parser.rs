@@ -67,6 +67,7 @@ impl<'a> Parser<'a> {
             Some(Token::If) => self.parse_if(),
             Some(Token::While) => self.parse_while(),
             Some(Token::For) => self.parse_for(),
+            Some(Token::Function) => self.parse_function(),
             _ => self.parse_assignment(),
         }
     }
@@ -173,6 +174,30 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn parse_function(&mut self) -> Expression {
+        self.consume(&Token::Function);
+
+        let identifier = match self.get_current() {
+            Token::Identifier(identifier) => identifier,
+            _ => panic!(
+                "Invalid token ${:?} at position {}",
+                self.get_current(),
+                self.position
+            ),
+        };
+
+        self.consume(&Token::Identifier(identifier.clone()));
+        self.consume(&Token::ParenthesesOpen);
+        self.consume(&Token::ParenthesesClosed);
+
+        let expression = self.parse_block();
+
+        Expression::Function {
+            identifier,
+            expression: Box::new(expression),
+        }
+    }
+
     /*
     An assignment follows this pattern:
         identifier -> Equals -> expression
@@ -187,6 +212,14 @@ impl<'a> Parser<'a> {
                 return Expression::Assign {
                     name: name.clone(),
                     value: Box::new(value),
+                };
+            }
+
+            if let Some(Token::ParenthesesOpen) = self.tokens.get(self.position) {
+                self.advance(1);
+                self.consume(&Token::ParenthesesClosed);
+                return Expression::FunctionCall {
+                    identifier: name.clone(),
                 };
             }
         }

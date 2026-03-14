@@ -21,5 +21,6 @@ mod tests {
         run_file("./src/examples/for_loop.nali".to_string());
         run_file("./src/examples/while_loop.nali".to_string());
         run_file("./src/examples/if.nali".to_string());
+        run_file("./src/examples/function.nali".to_string());
     }
 }
