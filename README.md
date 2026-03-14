@@ -1,6 +1,7 @@
 # Rust Interpreter
 
-A simple interpreter built in Rust. This project is a learning exercise to explore the concepts of building a programming language, including tokenizing, parsing, and evaluation.
+A simple interpreter built in Rust. This project is a learning exercise to explore the concepts of building a programming language, 
+including tokenizing, parsing, and evaluation.
 
 ## Features
 
