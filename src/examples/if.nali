@@ -1,0 +1,8 @@
+remember x = 5;
+remember y = 3;
+
+if (x < y) {
+  yell("smaller");
+} else {
+  yell("larger");
+}
