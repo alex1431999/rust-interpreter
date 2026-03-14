@@ -69,7 +69,7 @@ This interpreter is still under development. Here are some features planned for 
 *   **Functions:**
     *   Closures
 *   **Standard Library:**
-    *   A small set of built-in functions.
+    *   Read in from the command line
 
 ## Usage of AI
 This project has been purely hand-written and no AI was used to generate any of the code.
