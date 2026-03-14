@@ -74,8 +74,8 @@ impl<'a> Parser<'a> {
     fn parse_declaration(&mut self) -> Expression {
         self.consume(&Token::Remember); // Consume remember
 
-        let name = match self.tokens.get(self.position) {
-            Some(Token::Identifier(name)) => {
+        let name = match self.get_current() {
+            Token::Identifier(name) => {
                 self.advance(1);
                 name.clone()
             }
@@ -321,10 +321,7 @@ impl<'a> Parser<'a> {
             Some(Token::Quote) => {
                 self.advance(1);
 
-                match (
-                    self.tokens[self.position].clone(),
-                    self.tokens[self.position + 1].clone(),
-                ) {
+                match (self.get_current(), self.get_next()) {
                     (Token::String(string_value), Token::Quote) => {
                         self.advance(2);
                         Expression::String(string_value)
@@ -369,9 +366,9 @@ impl<'a> Parser<'a> {
             let expression = self.parse_statement();
             expressions.push(expression);
 
-            match self.tokens.get(self.position) {
-                Some(Token::Semicolon) => self.advance(1),
-                Some(Token::BlockClosed) => break,
+            match self.get_current() {
+                Token::Semicolon => self.advance(1),
+                Token::BlockClosed => break,
                 _ => panic!("Expected ';' or '}}' in block"),
             }
         }
