@@ -33,6 +33,7 @@ fn interpret(program: &Program, env: &Rc<RefCell<Environment>>) -> Value {
 fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>) -> Value {
     match expression {
         Expression::Number(n) => Value::Number(*n),
+        Expression::Float(f) => Value::Float(*f),
         Expression::Boolean(boolean) => Value::Boolean(*boolean),
         Expression::String(string) => Value::String(string.clone()),
         Expression::List(items) => {
@@ -178,6 +179,7 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
             let mut condition_evaluated = interpret_expression(condition, env);
             let mut continue_loop = match condition_evaluated {
                 Value::Number(number) => number > 0,
+                Value::Float(float) => float > 0.0,
                 Value::Boolean(bool) => bool,
                 Value::String(string) => string != "",
                 Value::Null => false,
@@ -191,6 +193,7 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
                 condition_evaluated = interpret_expression(condition, env);
                 continue_loop = match condition_evaluated {
                     Value::Number(number) => number > 0,
+                    Value::Float(float) => float > 0.0,
                     Value::Boolean(bool) => bool,
                     Value::String(string) => string != "",
                     Value::Null => false,
@@ -495,5 +498,10 @@ mod tests {
             execute_interpreter("remember x = 0; for (y in [5, 6]) { x = y }; y;"),
             Value::Number(6)
         )
+    }
+
+    #[test]
+    fn float() {
+        assert_eq!(execute_interpreter("5.5"), Value::Float(5.5))
     }
 }

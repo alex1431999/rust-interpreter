@@ -1,6 +1,7 @@
 #[derive(Debug, PartialEq)]
 pub enum Expression {
     Number(i64),
+    Float(f64),
     String(String),
     Variable(String),
     Boolean(bool),
@@ -63,6 +64,7 @@ pub enum Comparator {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     Number(i64),
+    Float(f64),
     Operation(Operation),
     ParenthesesOpen,
     ParenthesesClosed,
@@ -92,6 +94,7 @@ pub enum Token {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Value {
     Number(i64),
+    Float(f64),
     Boolean(bool),
     String(String),
     List(Vec<Value>),

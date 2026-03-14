@@ -111,12 +111,29 @@ impl<'a> Tokenizer<'a> {
         let character = self.get_current();
 
         if character.is_ascii_digit() {
-            let mut number = 0;
-            while self.has_next() && self.get_current().is_ascii_digit() {
-                number = number * 10 + self.get_current().to_digit(10).unwrap() as i64;
-                self.advance(1)
+            let mut is_float = false;
+            let mut number_string = String::new();
+
+            // Check if the number is a float or not
+            while self.has_next()
+                && (self.get_current().is_ascii_digit() || self.get_current() == '.')
+            {
+                if self.get_current() == '.' {
+                    is_float = true;
+                }
+
+                number_string.push(self.get_current());
+                self.advance(1);
             }
-            self.tokens.push(Token::Number(number));
+
+            if is_float {
+                self.tokens
+                    .push(Token::Float(number_string.parse().unwrap()))
+            } else {
+                self.tokens
+                    .push(Token::Number(number_string.parse().unwrap()))
+            }
+
             return true;
         }
 

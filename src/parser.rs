@@ -290,6 +290,10 @@ impl<'a> Parser<'a> {
                 self.advance(1);
                 Expression::Number(*n)
             }
+            Some(Token::Float(f)) => {
+                self.advance(1);
+                Expression::Float(*f)
+            }
             Some(Token::True) => {
                 self.advance(1);
                 Expression::Boolean(true)
