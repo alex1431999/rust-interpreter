@@ -178,16 +178,15 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
         } => {
             let mut condition_evaluated = interpret_expression(condition, env);
             let mut continue_loop = is_truthy_value(condition_evaluated);
-            let mut expression_evaluated = Value::Null;
 
             while continue_loop {
-                expression_evaluated = interpret_expression(expression, env);
+                interpret_expression(expression, env);
 
                 condition_evaluated = interpret_expression(condition, env);
                 continue_loop = is_truthy_value(condition_evaluated);
             }
 
-            expression_evaluated
+            Value::Null
         }
         Expression::For {
             identifier,
