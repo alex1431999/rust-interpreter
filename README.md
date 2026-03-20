@@ -70,3 +70,11 @@ including tokenizing, parsing, and evaluation.
 This project has been purely hand-written and no AI was used to generate any of the code.
 It's a learning project to teach myself about interpreters/compilers so any AI usage for code
 generation would be counterproductive.
+
+## State of the project
+This project is considered finished. I have implemented all the features that I found interesting and we now have a fully
+functional interpreter of my pet language :)
+
+Building my first interpreter has been a great experience and taught me a lot about how modern languages work and why, for
+example, some languages like rust (even though rust is not interpreted), always return a value even if you don't write
+`return`.
