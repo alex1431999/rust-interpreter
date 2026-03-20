@@ -39,6 +39,11 @@ including tokenizing, parsing, and evaluation.
     ```
     yell(5 + 5);
     ```
+*  **Input:**
+   *   Take input from the console with `prompt()`.
+   ```
+   remember input = prompt()
+   ```
 
 ## Getting Started
 
@@ -69,8 +74,6 @@ This interpreter is still under development. Here are some features planned for 
     *    `break` and `continue` statements
 *   **Functions:**
     *   Closures
-*   **Standard Library:**
-    *   Read in from the command line
 
 ## Usage of AI
 This project has been purely hand-written and no AI was used to generate any of the code.
