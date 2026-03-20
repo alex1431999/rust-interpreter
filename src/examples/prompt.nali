@@ -1,0 +1,3 @@
+remember my_string = prompt();
+
+yell(my_string);
