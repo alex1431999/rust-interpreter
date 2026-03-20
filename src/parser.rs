@@ -428,6 +428,13 @@ impl<'a> Parser<'a> {
 
                 Expression::List(items)
             }
+            Some(Token::Prompt) => {
+                self.advance(1);
+                self.consume(&Token::ParenthesesOpen);
+                self.consume(&Token::ParenthesesClosed);
+
+                Expression::Prompt
+            }
             _ => panic!("Unexpected token {:?} at position {}", token, self.position),
         }
     }

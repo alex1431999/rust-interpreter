@@ -1,0 +1,3 @@
+my_string = input();
+
+yell(my_string);

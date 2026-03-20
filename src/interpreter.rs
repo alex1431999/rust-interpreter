@@ -3,8 +3,10 @@ use crate::enums::{Operation, Value};
 use crate::environment::{Environment, EnvironmentRecord};
 use crate::parser::Program;
 use crate::{parser, tokenizer};
+use io::stdin;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::io;
 use std::rc::Rc;
 
 pub fn execute_interpreter(input: &str) -> Value {
@@ -273,6 +275,15 @@ fn interpret_expression(expression: &Expression, env: &Rc<RefCell<Environment>>)
                 }
                 _ => panic!("Undefined variable '{}'", identifier),
             }
+        }
+        Expression::Prompt => {
+            let mut input_string = String::new();
+
+            stdin()
+                .read_line(&mut input_string)
+                .expect("Failed to read input");
+
+            Value::String(input_string)
         }
     }
 }

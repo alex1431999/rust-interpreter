@@ -163,6 +163,7 @@ impl<'a> Tokenizer<'a> {
                 "for" => Token::For,
                 "in" => Token::In,
                 "function" => Token::Function,
+                "prompt" => Token::Prompt,
                 _ => Token::Identifier(identifier),
             };
             self.tokens.push(token);

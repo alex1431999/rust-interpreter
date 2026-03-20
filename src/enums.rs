@@ -6,6 +6,7 @@ pub enum Expression {
     Variable(String),
     Boolean(bool),
     List(Vec<Expression>),
+    Prompt,
     Null,
     Block {
         expressions: Vec<Expression>,
@@ -99,6 +100,7 @@ pub enum Token {
     For,
     In,
     Function,
+    Prompt,
 }
 
 #[derive(Clone, Debug, PartialEq)]
