@@ -630,4 +630,18 @@ mod tests {
             }
         )
     }
+
+    #[test]
+    fn prompt() {
+        assert_eq!(
+            parse(&vec![
+                Token::Prompt,
+                Token::ParenthesesOpen,
+                Token::ParenthesesClosed
+            ]),
+            Program {
+                expressions: vec![Expression::Prompt]
+            }
+        )
+    }
 }
